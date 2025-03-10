@@ -3,5 +3,5 @@ import react from '@vitejs/plugin-react';
 
 export default defineConfig({
   plugins: [react()],
-  base: "/alduindev/", // Nombre del repositorio
+  base: "/alduindev/",
 });
