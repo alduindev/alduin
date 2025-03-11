@@ -1,133 +1,47 @@
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
+import UIHeader from "./components/organism/UIHeader";
+import UIBannerSlider from "./components/organism/UIBannerSlider";
+import UIFooter from "./components/organism/UIFooter";
 
 export default function App() {
-  const originalText = "alduindev";
-  const textRef = useRef(null);
-  const [displayText, setDisplayText] = useState("");
-  const [isComplete, setIsComplete] = useState(false);
-  const [showSmiley, setShowSmiley] = useState(false);
+  const videos = [
+    "https://motionbgs.com/media/6382/thousand-sunny-from-one-piece.960x540.mp4",
+    "https://motionbgs.com/media/3272/luffys-resolve-under-the-night-sky.960x540.mp4",
+    "https://v1.pinimg.com/videos/mc/expMp4/92/f3/00/92f300aa1de1fa41d9e26b65235d432f_t3.mp4",
+  ];
 
-  // Caracteres de diferentes alfabetos y símbolos
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()_+[]{}|;:',.<>/?~¥€£¢₹©®™✓•–—«»‹›„“”„‘’‚‽※♠♣♥♦♪♫♬𠜎𠜱𠝹𠱓";
-
-  useEffect(() => {
-    let iteration = 0;
-    const maxLength = 15; // Longitud máxima del texto
-    const interval = setInterval(() => {
-      if (iteration < maxLength) {
-        // Construye el texto aleatorio
-        const randomText = Array.from({ length: maxLength }, () =>
-          characters.charAt(Math.floor(Math.random() * characters.length))
-        ).join("");
-
-        setDisplayText(randomText);
-        iteration++;
-      } else {
-        // Poco a poco se convierte en "Alduin"
-        setDisplayText((prevText) =>
-          originalText
-            .split("")
-            .map((char, index) => {
-              if (index < iteration - maxLength) {
-                return originalText[index];
-              }
-              return characters.charAt(
-                Math.floor(Math.random() * characters.length)
-              );
-            })
-            .join("")
-        );
-        iteration++;
-
-        if (iteration > maxLength + originalText.length) {
-          clearInterval(interval);
-          setIsComplete(true);
-
-          // Latido y Carita Feliz después de "Alduin"
-          setTimeout(() => {
-            setShowSmiley(true);
-          }, 10000); // Aparece la carita feliz después de 10 segundos
-
-          // Reiniciar ciclo después de 10 segundos
-          setTimeout(() => {
-            setIsComplete(false);
-            setShowSmiley(false);
-            setDisplayText("");
-            intervalStart(); // Reinicia la animación
-          }, 15000);
-        }
-      }
-    }, 250); // Velocidad más lenta
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Función para reiniciar el intervalo
-  const intervalStart = () => {
-    let iteration = 0;
-    const maxLength = 15;
-    const interval = setInterval(() => {
-      if (iteration < maxLength) {
-        const randomText = Array.from({ length: maxLength }, () =>
-          characters.charAt(Math.floor(Math.random() * characters.length))
-        ).join("");
-        setDisplayText(randomText);
-        iteration++;
-      } else {
-        setDisplayText((prevText) =>
-          originalText
-            .split("")
-            .map((char, index) => {
-              if (index < iteration - maxLength) {
-                return originalText[index];
-              }
-              return characters.charAt(
-                Math.floor(Math.random() * characters.length)
-              );
-            })
-            .join("")
-        );
-        iteration++;
-
-        if (iteration > maxLength + originalText.length) {
-          clearInterval(interval);
-          setIsComplete(true);
-          setTimeout(() => {
-            setShowSmiley(true);
-          }, 3000);
-
-          setTimeout(() => {
-            setIsComplete(false);
-            setShowSmiley(false);
-            setDisplayText("");
-            intervalStart(); // Reinicia la animación
-          }, 10000);
-        }
-      }
-    }, 250);
-  };
+  const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-black text-white overflow-hidden relative">
-      <div className="absolute top-0 left-0 w-full h-full z-0 animate-matrix-bg"></div>
-      <h1
-        ref={textRef}
-        className={`text-[10vw] sm:text-[8vw] md:text-[6vw] lg:text-[5vw] font-bold animate-matrix-green ${
-          isComplete ? "text-white animate-heartbeat" : "text-transparent"
-        } z-10`}
-      >
-        {showSmiley ? (
-          <span className="text-white">☺</span>
-        ) : (
-          <span className="relative">
-            <span className="absolute top-0 left-0 z-0 text-[#52fc11] opacity-30">
-              {displayText}
-            </span>
-            <span className="relative z-10 text-white">{displayText}</span>
-          </span>
-        )}
-      </h1>
+    <div className="relative flex flex-col min-h-screen">
+      <div className="absolute inset-0 w-full h-full">
+        <video
+          key={currentVideoIndex}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 opacity-100"
+        >
+          <source src={videos[currentVideoIndex]} type="video/mp4" />
+        </video>
+      </div>
+
+      <div className="absolute inset-0 backdrop-blur-[3px]"></div>
+
+      <div className="relative flex flex-col min-h-screen">
+        <UIHeader />
+
+        <main className="flex-1 flex items-center justify-center p-6">
+          <UIBannerSlider
+            videos={videos}
+            currentIndex={currentVideoIndex}
+            setCurrentIndex={setCurrentVideoIndex}
+          />
+        </main>
+
+        <UIFooter />
+      </div>
     </div>
   );
 }
