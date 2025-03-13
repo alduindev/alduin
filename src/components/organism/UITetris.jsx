@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 
 const ROWS = 20;
 const COLS = 10;
+const CELL_SIZE = 30;
 const SHAPES = {
   I: [[1, 1, 1, 1]],
   O: [
@@ -58,10 +59,22 @@ const rotatePiece = (piece) => {
 const UITetris = () => {
   const [grid, setGrid] = useState(createGrid());
   const [piece, setPiece] = useState(getRandomPiece());
+  const [nextPiece, setNextPiece] = useState(getRandomPiece());
   const [pos, setPos] = useState({ x: 3, y: 0 });
   const [score, setScore] = useState(0);
   const [lines, setLines] = useState(0);
   const [gameOver, setGameOver] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+
+  const resetGame = () => {
+    setGrid(createGrid());
+    setPiece(getRandomPiece());
+    setNextPiece(getRandomPiece());
+    setPos({ x: 3, y: 0 });
+    setScore(0);
+    setLines(0);
+    setGameOver(false);
+  };
 
   const mergePiece = () => {
     const newGrid = grid.map(row => [...row]);
@@ -79,7 +92,8 @@ const UITetris = () => {
       const newGrid = mergePiece();
       const clearedGrid = removeFullRows(newGrid);
       setGrid(clearedGrid);
-      const newPiece = getRandomPiece();
+      const newPiece = nextPiece;
+      setNextPiece(getRandomPiece());
       const startPos = { x: 3, y: 0 };
 
       if (checkCollision(clearedGrid, newPiece, startPos)) {
@@ -119,7 +133,7 @@ const UITetris = () => {
     }
 
     setLines(prev => prev + newLines);
-    setScore(prev => prev + newLines * 100);
+    setScore(prev => prev + newLines * 10 + (newLines > 1 ? 50 : 0));
     return filteredGrid;
   };
 
@@ -137,29 +151,82 @@ const UITetris = () => {
   }, [pos, piece, gameOver]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
       <h1 className="text-3xl font-bold mb-4">Tetris</h1>
-      {gameOver && <p className="text-red-500 text-xl">Game Over</p>}
-      <div className="grid grid-cols-10 gap-0.5 border-4 border-gray-600 p-1">
-        {grid.map((row, y) =>
-          row.map((cell, x) => {
-            const isPiece = piece.blocks.some((r, dy) => r.some((c, dx) => c && pos.y + dy === y && pos.x + dx === x));
-            return (
-              <div key={`${y}-${x}`} className={`w-6 h-6 ${isPiece ? piece.color : cell || "bg-gray-700"} border border-gray-800`} />
-            );
-          })
-        )}
-      </div>
-      <div className="flex justify-between w-60 mt-4">
+
+      {gameOver && (
         <div className="text-center">
-          <p className="text-lg font-semibold">Score</p>
-          <p>{score}</p>
+          <p className="text-red-500 text-xl">Game Over</p>
+          <button className="mt-2 px-4 py-2 bg-blue-500 rounded" onClick={resetGame}>
+            Reiniciar
+          </button>
         </div>
-        <div className="text-center">
-          <p className="text-lg font-semibold">Lines</p>
-          <p>{lines}</p>
+      )}
+
+      <div className="flex flex-col md:flex-row items-center md:items-start space-x-4">
+        <div
+          className="grid gap-0.5 border-4 border-gray-600 p-2"
+          style={{
+            gridTemplateColumns: `repeat(${COLS}, ${CELL_SIZE}px)`,
+            gridTemplateRows: `repeat(${ROWS}, ${CELL_SIZE}px)`,
+          }}
+        >
+          {grid.map((row, y) =>
+            row.map((cell, x) => {
+              const isPiece = piece.blocks.some((r, dy) =>
+                r.some((c, dx) => c && pos.y + dy === y && pos.x + dx === x)
+              );
+              return (
+                <div
+                  key={`${y}-${x}`}
+                  className={`w-[${CELL_SIZE}px] h-[${CELL_SIZE}px] ${
+                    isPiece ? piece.color : cell || "bg-gray-700"
+                  } border border-gray-800`}
+                />
+              );
+            })
+          )}
+        </div>
+
+        <div className="flex flex-col items-center bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-700">
+          <p className="text-lg font-semibold text-white mb-2">Siguiente</p>
+          <div
+            className="grid gap-1 p-2 border border-gray-600 rounded-lg"
+            style={{
+              gridTemplateColumns: `repeat(${nextPiece.blocks[0].length}, ${CELL_SIZE}px)`,
+              gridTemplateRows: `repeat(${nextPiece.blocks.length}, ${CELL_SIZE}px)`,
+            }}
+          >
+            {nextPiece.blocks.map((row, y) =>
+              row.map((cell, x) => (
+                <div
+                  key={`${y}-${x}`}
+                  className={`w-[${CELL_SIZE}px] h-[${CELL_SIZE}px] ${
+                    cell ? nextPiece.color : "bg-gray-700"
+                  } border border-gray-600`}
+                />
+              ))
+            )}
+          </div>
         </div>
       </div>
+
+      <div className="mt-4 text-center">
+        <p className="text-lg font-semibold">Puntuación: {score}</p>
+        <p className="text-lg font-semibold">Líneas: {lines}</p>
+      </div>
+
+      {isMobile && (
+        <div className="flex flex-col items-center mt-4">
+          <div className="flex space-x-2">
+            <button className="p-3 bg-blue-500 rounded" onClick={() => movePiece(-1, 0)}>⬅️</button>
+            <button className="p-3 bg-green-500 rounded" onClick={() => movePiece(1, 0)}>➡️</button>
+          </div>
+          <div className="flex mt-2">
+            <button className="p-3 bg-red-500 rounded" onClick={() => movePiece(0, 1)}>⬇️</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
