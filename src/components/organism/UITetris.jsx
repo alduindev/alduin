@@ -151,19 +151,11 @@ const UITetris = () => {
   }, [pos, piece, gameOver]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
-      <h1 className="text-3xl font-bold">Tetris</h1>
+    <div className="flex flex-col items-center min-h-screen bg-gray-900 text-white p-4">
+      <h1 className="text-3xl font-bold my-4">Tetris</h1>
 
-      {gameOver && (
-        <div className="text-center">
-          <p className="text-red-500 text-xl">Game Over</p>
-          <button className="mt-2 px-4 py-2 bg-blue-500 rounded" onClick={resetGame}>
-            Reiniciar
-          </button>
-        </div>
-      )}
 
-      <div className="flex flex-col md:flex-row items-center md:items-start space-x-4 scale-75">
+      <div className="flex flex-col-reverse gap-4 items-center space-x-4">
         <div
           className="grid gap-0.5 border-4 border-gray-600 p-2"
           style={{
@@ -187,7 +179,7 @@ const UITetris = () => {
           )}
         </div>
 
-        <div className="flex flex-col items-center bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-700 mt-10">
+        <div className="flex flex-col items-center bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-700">
           <p className="text-lg font-semibold text-white mb-2">Siguiente</p>
           <div
             className="grid gap-1 p-2 border border-gray-600 rounded-lg"
@@ -209,7 +201,7 @@ const UITetris = () => {
         </div>
       </div>
 
-      <div className="mt-4 text-center">
+      <div className="text-center">
         <p className="text-lg font-semibold">Puntuación: {score}</p>
         <p className="text-lg font-semibold">Líneas: {lines}</p>
       </div>
@@ -233,6 +225,16 @@ const UITetris = () => {
           </div>
           <div className="flex mt-2">
           </div>
+        </div>
+      )}
+
+      
+{gameOver && (
+        <div className="text-center">
+          <p className="text-red-500 text-xl">Game Over</p>
+          <button className="mt-2 px-4 py-2 bg-blue-500 rounded" onClick={resetGame}>
+            Reiniciar
+          </button>
         </div>
       )}
     </div>
