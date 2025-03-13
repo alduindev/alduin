@@ -154,8 +154,30 @@ const UITetris = () => {
     <div className="flex flex-col items-center min-h-screen bg-gray-900 text-white p-4">
       <h1 className="text-3xl font-bold my-4">Tetris</h1>
 
+      {isMobile && (
+        <div className="flex flex-col items-center mt-4">
+          <div className="flex space-x-2">
+            <button className="p-3 bg-blue-500 rounded" onClick={() => movePiece(-1, 0)}>⬅️</button>
+            <button className="p-3 bg-green-500 rounded" onClick={() => movePiece(1, 0)}>➡️</button>
+            <button className="p-3 bg-red-500 rounded" onClick={() => movePiece(0, 1)}>⬇️</button>
+            <button className="p-3 bg-red-500 rounded" onClick={() => {
+              const rotated = rotatePiece(piece);
+              if (!checkCollision(grid, rotated, pos)) {
+                setPiece(rotated);
+              }
+            }}>
+              🔁
+            </button>
 
-      <div className="flex flex-col-reverse gap-4 items-center space-x-4">
+
+          </div>
+          <div className="flex mt-2">
+          </div>
+        </div>
+      )}
+
+
+      <div className="flex flex-col gap-4 items-center space-x-4">
         <div
           className="grid gap-0.5 border-4 border-gray-600 p-2"
           style={{
@@ -206,27 +228,7 @@ const UITetris = () => {
         <p className="text-lg font-semibold">Líneas: {lines}</p>
       </div>
 
-      {isMobile && (
-        <div className="flex flex-col items-center mt-4">
-          <div className="flex space-x-2">
-            <button className="p-3 bg-blue-500 rounded" onClick={() => movePiece(-1, 0)}>⬅️</button>
-            <button className="p-3 bg-green-500 rounded" onClick={() => movePiece(1, 0)}>➡️</button>
-            <button className="p-3 bg-red-500 rounded" onClick={() => movePiece(0, 1)}>⬇️</button>
-            <button className="p-3 bg-red-500 rounded" onClick={() => {
-              const rotated = rotatePiece(piece);
-              if (!checkCollision(grid, rotated, pos)) {
-                setPiece(rotated);
-              }
-            }}>
-              🔁
-            </button>
-
-
-          </div>
-          <div className="flex mt-2">
-          </div>
-        </div>
-      )}
+      
 
       
 {gameOver && (
