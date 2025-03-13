@@ -179,9 +179,8 @@ const UITetris = () => {
               return (
                 <div
                   key={`${y}-${x}`}
-                  className={`w-[${CELL_SIZE}px] h-[${CELL_SIZE}px] ${
-                    isPiece ? piece.color : cell || "bg-gray-700"
-                  } border border-gray-800`}
+                  className={`w-[${CELL_SIZE}px] h-[${CELL_SIZE}px] ${isPiece ? piece.color : cell || "bg-gray-700"
+                    } border border-gray-800`}
                 />
               );
             })
@@ -201,9 +200,8 @@ const UITetris = () => {
               row.map((cell, x) => (
                 <div
                   key={`${y}-${x}`}
-                  className={`w-[${CELL_SIZE}px] h-[${CELL_SIZE}px] ${
-                    cell ? nextPiece.color : "bg-gray-700"
-                  } border border-gray-600`}
+                  className={`w-[${CELL_SIZE}px] h-[${CELL_SIZE}px] ${cell ? nextPiece.color : "bg-gray-700"
+                    } border border-gray-600`}
                 />
               ))
             )}
@@ -222,7 +220,15 @@ const UITetris = () => {
             <button className="p-3 bg-blue-500 rounded" onClick={() => movePiece(-1, 0)}>⬅️</button>
             <button className="p-3 bg-green-500 rounded" onClick={() => movePiece(1, 0)}>➡️</button>
             <button className="p-3 bg-red-500 rounded" onClick={() => movePiece(0, 1)}>⬇️</button>
-            <button className="p-3 bg-red-500 rounded" onClick={() => movePiece()}>🔁</button>
+            <button className="p-3 bg-red-500 rounded" onClick={() => {
+              const rotated = rotatePiece(piece);
+              if (!checkCollision(grid, rotated, pos)) {
+                setPiece(rotated);
+              }
+            }}>
+              🔁
+            </button>
+
 
           </div>
           <div className="flex mt-2">
