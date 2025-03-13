@@ -221,9 +221,11 @@ const UITetris = () => {
           <div className="flex space-x-2">
             <button className="p-3 bg-blue-500 rounded" onClick={() => movePiece(-1, 0)}>⬅️</button>
             <button className="p-3 bg-green-500 rounded" onClick={() => movePiece(1, 0)}>➡️</button>
+            <button className="p-3 bg-red-500 rounded" onClick={() => movePiece(0, 1)}>⬇️</button>
+            <button className="p-3 bg-red-500 rounded" onClick={() => rotatePiece(0, 1)}>🔁</button>
+
           </div>
           <div className="flex mt-2">
-            <button className="p-3 bg-red-500 rounded" onClick={() => movePiece(0, 1)}>⬇️</button>
           </div>
         </div>
       )}
