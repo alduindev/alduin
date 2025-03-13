@@ -2,6 +2,7 @@ import { useState } from "react";
 import UIHeader from "./components/organism/UIHeader";
 import UIBannerSlider from "./components/organism/UIBannerSlider";
 import UIFooter from "./components/organism/UIFooter";
+import UITetris from "./components/organism/UITetris";
 
 export default function App() {
   const videos = [
@@ -30,7 +31,7 @@ export default function App() {
       <div className="absolute inset-0 backdrop-blur-[3px]"></div>
 
       <div className="relative flex flex-col min-h-screen">
-        <UIHeader />
+        {/* <UIHeader />
 
         <main className="flex-1 flex items-center justify-center p-6">
           <UIBannerSlider
@@ -40,7 +41,8 @@ export default function App() {
           />
         </main>
 
-        <UIFooter />
+        <UIFooter /> */}
+        <UITetris />
       </div>
     </div>
   );
