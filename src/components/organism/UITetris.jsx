@@ -152,7 +152,7 @@ const UITetris = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white p-4">
-      <h1 className="text-3xl font-bold mb-4">Tetris</h1>
+      <h1 className="text-3xl font-bold">Tetris</h1>
 
       {gameOver && (
         <div className="text-center">
@@ -188,7 +188,7 @@ const UITetris = () => {
           )}
         </div>
 
-        <div className="flex flex-col items-center bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-700">
+        <div className="flex flex-col items-center bg-gray-800 p-4 rounded-lg shadow-lg border border-gray-700 mt-10">
           <p className="text-lg font-semibold text-white mb-2">Siguiente</p>
           <div
             className="grid gap-1 p-2 border border-gray-600 rounded-lg"
@@ -222,7 +222,7 @@ const UITetris = () => {
             <button className="p-3 bg-blue-500 rounded" onClick={() => movePiece(-1, 0)}>⬅️</button>
             <button className="p-3 bg-green-500 rounded" onClick={() => movePiece(1, 0)}>➡️</button>
             <button className="p-3 bg-red-500 rounded" onClick={() => movePiece(0, 1)}>⬇️</button>
-            <button className="p-3 bg-red-500 rounded" onClick={() => rotatePiece(0, 1)}>🔁</button>
+            <button className="p-3 bg-red-500 rounded" onClick={() => movePiece()}>🔁</button>
 
           </div>
           <div className="flex mt-2">
