@@ -163,7 +163,7 @@ const UITetris = () => {
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row items-center md:items-start space-x-4">
+      <div className="flex flex-col md:flex-row items-center md:items-start space-x-4 scale-75">
         <div
           className="grid gap-0.5 border-4 border-gray-600 p-2"
           style={{
