@@ -2,7 +2,7 @@
   "name": "alduin",
   "private": true,
   "version": "0.0.0",
-  "homepage": "https://alduin-dev.github.io/alduindev",
+  "homepage": "https://alduindev.github.io/alduin/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
