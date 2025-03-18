@@ -5,7 +5,7 @@
   "homepage": "https://alduindev.github.io/alduin/",
   "scripts": {
     "dev": "env-cmd -f ./src/environments/.env.dev vite",
-    "build": "vite build",
+    "build": "env-cmd -f ./src/environments/.env.dev vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
