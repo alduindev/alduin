@@ -3,6 +3,7 @@ import UIHeader from "./components/organism/UIHeader";
 import UIBannerSlider from "./components/organism/UIBannerSlider";
 import UIFooter from "./components/organism/UIFooter";
 import UITetris from "./components/organism/UITetris";
+import UIMotivationalAgent from "./components/organism/UIMotivationAgent";
 
 export default function App() {
   const videos = [
@@ -42,7 +43,8 @@ export default function App() {
         </main>
 
         <UIFooter /> */}
-        <UITetris />
+        {/* <UITetris /> */}
+        <UIMotivationalAgent />
       </div>
     </div>
   );
