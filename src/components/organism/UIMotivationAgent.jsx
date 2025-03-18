@@ -17,7 +17,7 @@ const UIMotivationalAgent = () => {
   };
 
   const updateBackground = () => {
-    const hour = 17.5;
+    const hour = new Date().getHours();
     if (hour >= 0 && hour < 5) setBackgroundClass("bg-gray-900 text-white");
     else if (hour >= 5 && hour < 7) setBackgroundClass("bg-blue-900 text-yellow-100");
     else if (hour >= 7 && hour < 12) setBackgroundClass("bg-yellow-300 text-gray-900");
