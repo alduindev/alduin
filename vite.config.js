@@ -12,4 +12,9 @@ export default defineConfig({
   optimizeDeps: {
     include: ['esm-dep > cjs-dep'],
   },
+  define: {
+    'process.env': {
+      VITE_GEMINI_API_URL: process.env.VITE_GEMINI_API_URL,
+    }
+  }
 });

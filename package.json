@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "homepage": "https://alduindev.github.io/alduin/",
   "scripts": {
-    "dev": "vite",
+    "dev": "env-cmd -f ./src/environments/.env.dev vite",
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",

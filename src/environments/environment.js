@@ -1,0 +1,1 @@
+export const URL_GEMINI_API = process.env.VITE_GEMINI_API_URL;

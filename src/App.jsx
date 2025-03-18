@@ -15,8 +15,9 @@ export default function App() {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
   return (
-    <div className="relative flex flex-col min-h-screen">
-      <div className="absolute inset-0 w-full h-full">
+    <>
+    {/* <div className="relative flex flex-col min-h-screen"> */}
+      {/* <div className="absolute inset-0 w-full h-full">
         <video
           key={currentVideoIndex}
           autoPlay
@@ -27,11 +28,11 @@ export default function App() {
         >
           <source src={videos[currentVideoIndex]} type="video/mp4" />
         </video>
-      </div>
+      </div> */}
 
-      <div className="absolute inset-0 backdrop-blur-[3px]"></div>
+      {/* <div className="absolute inset-0 backdrop-blur-[3px]"></div> */}
 
-      <div className="relative flex flex-col min-h-screen">
+      {/* <div className="relative flex flex-col min-h-screen"> */}
         {/* <UIHeader />
 
         <main className="flex-1 flex items-center justify-center p-6">
@@ -45,7 +46,8 @@ export default function App() {
         <UIFooter /> */}
         {/* <UITetris /> */}
         <UIMotivationalAgent />
-      </div>
-    </div>
+      {/* </div> */}
+    {/* </div> */}
+    </>
   );
 }
