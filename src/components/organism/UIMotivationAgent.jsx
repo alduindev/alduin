@@ -12,7 +12,7 @@ const UIMotivationalAgent = () => {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) return "☀️ Buenos días";
-    if (hour >= 12 && hour < 19) return "🌤️ Buenas tardes";
+    if (hour >= 12 && hour < 18.5) return "🌤️ Buenas tardes";
     return "🌙 Buenas noches";
   };
 
@@ -22,7 +22,7 @@ const UIMotivationalAgent = () => {
     else if (hour >= 5 && hour < 7) setBackgroundClass("bg-blue-900 text-yellow-100");
     else if (hour >= 7 && hour < 12) setBackgroundClass("bg-yellow-300 text-gray-900");
     else if (hour >= 12 && hour < 17.5) setBackgroundClass("bg-orange-400 text-gray-900");
-    else if (hour >= 17.5 && hour < 19) setBackgroundClass("bg-orange-700 text-gray-100");
+    else if (hour >= 17.5 && hour < 18.5) setBackgroundClass("bg-orange-700 text-gray-100");
     else setBackgroundClass("bg-gray-800 text-white");
   };
 
