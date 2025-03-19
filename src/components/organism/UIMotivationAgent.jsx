@@ -39,7 +39,7 @@ const UIMotivationalAgent = () => {
     }
   };
 
-  const takeRealScreenshot = async () => {
+  const takeScreenshot = async () => {
     try {
       // Solicitar permisos para capturar la pantalla
       const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
