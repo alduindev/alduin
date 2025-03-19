@@ -221,38 +221,48 @@ const UIPuzzleGame = () => {
         </div>
       )}
 
-      {gameWon ? (
-        <div className="text-green-600 font-bold text-xl">🎉 ¡Ganaste! 🎉</div>
-      ) : lost ? (
-        <div className="text-red-600 font-bold text-xl">⏳ ¡Perdiste!</div>
-      ) : (
-        <canvas
-          ref={canvasRef}
-          className="border border-black bg-gray-700 w-full max-w-[450px] aspect-square"
-          onClick={(e) => {
-            if (!gameStarted) return;
-            const rect = canvasRef.current.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
-            const pieceSize = rect.width / GRID_SIZE;
-            const col = Math.floor(x / pieceSize);
-            const row = Math.floor(y / pieceSize);
-            moveTile(row * GRID_SIZE + col);
-          }}
-        />
-      )}
-      {(gameWon || lost) && (
-        <button
-          onClick={resetGame}
-          className="mt-4 px-6 py-2 font-bold text-gray-800 transition-all
-      rounded-[15%] bg-gradient-to-br from-white to-gray-300
-      shadow-[1px_1px_15px_#D9DADE,-1px_-1px_8px_#FFFFFF]
-      hover:bg-[#EEF0F4] hover:shadow-[inset_9.91px_9.91px_15px_#D9DADE,inset_-9.91px_-9.91px_15px_#FFFFFF]
-      active:bg-[#EEF0F4] active:shadow-[inset_9.91px_9.91px_15px_#D9DADE,inset_-9.91px_-9.91px_15px_#FFFFFF]"
-        >
-          Reiniciar
-        </button>
-      )}
+<div className="relative">
+  {gameWon ? (
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50">
+      <div className="text-green-600 font-bold text-xl mb-4">🎉 ¡Ganaste! 🎉</div>
+      <button
+        onClick={resetGame}
+        className="px-6 py-2 font-bold text-white transition-all
+          rounded-lg bg-gradient-to-br from-green-500 to-green-700
+          shadow-lg hover:scale-105 hover:from-green-600 hover:to-green-800"
+      >
+        Reiniciar
+      </button>
+    </div>
+  ) : lost ? (
+    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50">
+      <div className="text-white font-bold text-xl mb-4">⏳ ¡Perdiste!</div>
+      <button
+        onClick={resetGame}
+        className="px-6 py-2 font-bold text-white transition-all
+          rounded-lg bg-gradient-to-br from-red-500 to-red-700
+          shadow-lg hover:scale-105 hover:from-red-600 hover:to-red-800"
+      >
+        Reiniciar
+      </button>
+    </div>
+  ) : null}
+
+  <canvas
+    ref={canvasRef}
+    className="border border-black bg-gray-700 w-full max-w-[450px] aspect-square"
+    onClick={(e) => {
+      if (!gameStarted) return;
+      const rect = canvasRef.current.getBoundingClientRect();
+      const x = e.clientX - rect.left;
+      const y = e.clientY - rect.top;
+      const pieceSize = rect.width / GRID_SIZE;
+      const col = Math.floor(x / pieceSize);
+      const row = Math.floor(y / pieceSize);
+      moveTile(row * GRID_SIZE + col);
+    }}
+  />
+</div>
     </div>
   );
 };
