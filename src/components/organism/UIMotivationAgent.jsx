@@ -41,34 +41,23 @@ const UIMotivationalAgent = () => {
 
   const takeScreenshot = async () => {
     try {
-      // Solicitar permisos para capturar la pantalla
       const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
       const track = stream.getVideoTracks()[0];
       const imageCapture = new ImageCapture(track);
-  
-      // Capturar una imagen de la pantalla
       const bitmap = await imageCapture.grabFrame();
-      track.stop(); // Detener la captura de pantalla después de tomar la imagen
-  
-      // Convertir a canvas
+      track.stop();
+
       const canvas = document.createElement("canvas");
       canvas.width = bitmap.width;
       canvas.height = bitmap.height;
       const ctx = canvas.getContext("2d");
       ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
-  
-      // Convertir a PNG
+
       canvas.toBlob(async (blob) => {
         try {
-          // Intentar copiar al portapapeles
-          await navigator.clipboard.write([
-            new ClipboardItem({ "image/png": blob }),
-          ]);
+          await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
           alert("📸 Captura copiada al portapapeles.");
-        } catch (err) {
-          console.warn("No se pudo copiar, descargando en su lugar.");
-  
-          // Fallback: Descargar imagen si no se puede copiar
+        } catch {
           const link = document.createElement("a");
           link.href = URL.createObjectURL(blob);
           link.download = "captura_pantalla.png";
@@ -76,10 +65,63 @@ const UIMotivationalAgent = () => {
         }
       }, "image/png");
     } catch (err) {
-      console.error("Error al capturar la pantalla:", err);
       alert("⚠ No se pudo tomar la captura de pantalla.");
     }
   };
+
+  // ✅ Detección de teclas (Power + Volumen Arriba/Abajo)
+  useEffect(() => {
+    const handleKeydown = (event) => {
+      if ((event.key === "VolumeUp" || event.key === "VolumeDown") && event.metaKey) {
+        event.preventDefault();
+        takeRealScreenshot();
+      }
+    };
+    window.addEventListener("keydown", handleKeydown);
+    return () => window.removeEventListener("keydown", handleKeydown);
+  }, []);
+
+  // ✅ Detección de gestos (doble toque o deslizamiento con 3 dedos)
+  useEffect(() => {
+    let touchStartY = 0;
+    let touchEndY = 0;
+    let tapCount = 0;
+    let tapTimer = null;
+
+    const handleTouchStart = (e) => {
+      touchStartY = e.touches[0].clientY;
+      if (e.touches.length === 3) {
+        takeRealScreenshot();
+      }
+    };
+
+    const handleTouchEnd = (e) => {
+      touchEndY = e.changedTouches[0].clientY;
+      if (Math.abs(touchStartY - touchEndY) > 200) {
+        takeRealScreenshot();
+      }
+    };
+
+    const handleDoubleTap = () => {
+      tapCount++;
+      if (tapCount === 2) {
+        takeRealScreenshot();
+        tapCount = 0;
+      }
+      if (tapTimer) clearTimeout(tapTimer);
+      tapTimer = setTimeout(() => (tapCount = 0), 300);
+    };
+
+    window.addEventListener("touchstart", handleTouchStart);
+    window.addEventListener("touchend", handleTouchEnd);
+    window.addEventListener("touchend", handleDoubleTap);
+
+    return () => {
+      window.removeEventListener("touchstart", handleTouchStart);
+      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("touchend", handleDoubleTap);
+    };
+  }, []);
 
   const fetchQuotes = async () => {
     try {
