@@ -1,7 +1,7 @@
 import React, {useState} from "react";
-import UIHeader from "../organism/UIHeader";
-import UIFooter from "../organism/UIFooter";
-import UIBannerSlider from "../organism/UIBannerSlider";
+import UIHeader from "../components/organism/UIHeader";
+import UIFooter from "../components/organism/UIFooter";
+import UIBannerSlider from "../components/organism/UIBannerSlider";
 
 const PageWebsite = () => {
   const videos = [

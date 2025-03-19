@@ -1,4 +1,4 @@
-import RouterMain from "./components/routes/RouterMain";
+import RouterMain from "./routes/RouterMain";
 
 export default function App() {
 

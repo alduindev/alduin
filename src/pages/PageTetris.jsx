@@ -1,5 +1,5 @@
 import React from 'react'
-import UITetris from '../organism/UITetris'
+import UITetris from '../components/organism/UITetris'
 
 const PageTetris = () => {
   return (
