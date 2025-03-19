@@ -168,8 +168,7 @@ const UIBreakout = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      <h2 className="text-lg text-center font-semibold mb-2">Breakout Game</h2>
+    <div className="flex flex-col items-center min-h-screen py-4">
 
       {gameStarted ? (
         <>
@@ -182,7 +181,7 @@ const UIBreakout = () => {
             ref={canvasRef}
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
-            className="border border-black bg-gray-900"
+            className="border border-black bg-gray-900 scale-75 "
             onTouchMove={handleTouchMove}
           ></canvas>
 
