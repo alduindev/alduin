@@ -148,6 +148,8 @@ const UIBreakout = () => {
   };
 
   const handleTouchMove = (e) => {
+    if (!canvasRef.current) return;
+
     const rect = canvasRef.current.getBoundingClientRect();
     let touchX = e.touches[0].clientX - rect.left;
     let newPaddleX = touchX - PADDLE_WIDTH / 2;
@@ -155,8 +157,13 @@ const UIBreakout = () => {
     if (newPaddleX < 0) newPaddleX = 0;
     if (newPaddleX + PADDLE_WIDTH > CANVAS_WIDTH) newPaddleX = CANVAS_WIDTH - PADDLE_WIDTH;
 
-    setPaddleX(newPaddleX);
-  };
+    requestAnimationFrame(() => setPaddleX(newPaddleX));
+};
+
+const handleTouchStart = (e) => {
+    e.preventDefault(); // Evita el comportamiento no deseado en móviles
+    handleTouchMove(e); // Asegura que el primer toque ya mueva el paddle correctamente
+};
 
   const startGame = () => {
     setBall({ x: CANVAS_WIDTH / 2, y: CANVAS_HEIGHT - 30, dx: 2, dy: -2 });
@@ -172,7 +179,7 @@ const UIBreakout = () => {
 
       {gameStarted ? (
         <>
-          <div className="text-blue-600 font-bold text-xl mb-2">🔢 Puntuación: {score}</div>
+          <div className="text-blue-600 font-bold text-xl">🔢 Puntuación: {score}</div>
 
           {gameWon && <div className="text-green-600 font-bold text-xl">🎉 ¡Ganaste! 🎉</div>}
           {gameOver && <div className="text-red-600 font-bold text-xl">💥 ¡Perdiste! 💥</div>}
@@ -181,12 +188,13 @@ const UIBreakout = () => {
             ref={canvasRef}
             width={CANVAS_WIDTH}
             height={CANVAS_HEIGHT}
-            className="border border-black bg-gray-900 scale-75 "
+            className="border border-black bg-gray-900 scale-75"
+            onTouchStart={handleTouchStart}
             onTouchMove={handleTouchMove}
           ></canvas>
 
           {(gameOver || gameWon) && (
-            <button onClick={startGame} className="mt-4 px-6 py-2 font-bold text-gray-800 bg-gray-300 rounded-lg shadow-md">
+            <button onClick={startGame} className="px-6 py-2 font-bold text-gray-800 bg-gray-300 rounded-lg shadow-md">
               Reiniciar
             </button>
           )}
