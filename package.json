@@ -8,7 +8,8 @@
     "build": "env-cmd -f ./src/environments/.env.dev vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "predeploy": "npm run build",
+    "postbuild": "cp build/index.html build/404.html",  
+    "predeploy": "yarn build",
     "deploy": "gh-pages -d build"
   },
   "dependencies": {
