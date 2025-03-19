@@ -1,5 +1,5 @@
 import React from 'react'
-import UIMusicPlayer from '../organism/UIMusicPlayer'
+import UIMusicPlayer from '../components/organism/UIMusicPlayer'
 
 const PageMusic = () => {
   return (

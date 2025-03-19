@@ -1,5 +1,5 @@
 import React from 'react'
-import UIPuzzleGame from '../organism/UIPuzzleGame'
+import UIPuzzleGame from '../components/organism/UIPuzzleGame'
 
 const PagePuzzle = () => {
   return (

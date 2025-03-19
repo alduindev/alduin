@@ -4,6 +4,7 @@ import PageMusic from "../pages/PageMusic";
 import PagePuzzle from "../pages/PagePuzzle";
 import PageWebsite from "../pages/PageWebsite";
 import PageTetris from "../pages/PageTetris";
+import PageBreakout from "../pages/PageBreakout";
 
 export default function RouterMain() {
   return (
@@ -14,6 +15,7 @@ export default function RouterMain() {
         <Route path="/puzzle" element={<PagePuzzle />} />
         <Route path="/website" element={<PageWebsite />} />
         <Route path="/tetris" element={<PageTetris />} />
+        <Route path="/breakout" element={<PageBreakout />} />
       </Routes>
     </Router>
   );

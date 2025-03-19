@@ -1,5 +1,5 @@
 import React from 'react'
-import UIMotivationalAgent from '../organism/UIMotivationAgent'
+import UIMotivationalAgent from '../components/organism/UIMotivationAgent'
 
 const PageMotivation = () => {
   return (
