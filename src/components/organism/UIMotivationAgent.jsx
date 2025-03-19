@@ -1,19 +1,23 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { URL_GEMINI_API } from "../../environments/environment";
+import html2canvas from "html2canvas";
+
 
 const UIMotivationalAgent = () => {
   const [quotes, setQuotes] = useState([]);
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
   const [shownQuotes, setShownQuotes] = useState(new Set());
   const [backgroundClass, setBackgroundClass] = useState("");
+  const [currentTime, setCurrentTime] = useState("");
+  const screenshotRef = useRef(null);
 
   const API_KEY = URL_GEMINI_API;
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour >= 5 && hour < 12) return "☀️ Buenos días";
-    if (hour >= 12 && hour < 18.5) return "🌤️ Buenas tardes";
-    return "🌙 Buenas noches";
+    if (hour >= 5 && hour < 12) return "Buen día ☀";
+    if (hour >= 12 && hour < 18.5) return "Buenas tardes 🌤️";
+    return "Buenas noches 🌙";
   };
 
   const updateBackground = () => {
@@ -35,6 +39,19 @@ const UIMotivationalAgent = () => {
     }
   };
 
+  const takeScreenshot = async () => {
+    if (screenshotRef.current) {
+      const canvas = await html2canvas(screenshotRef.current);
+      const image = canvas.toDataURL("image/png");
+
+      // Crear un enlace para descargar la imagen
+      const link = document.createElement("a");
+      link.href = image;
+      link.download = "frase.png";
+      link.click();
+    }
+  };
+
   const fetchQuotes = async () => {
     try {
       const response = await fetch(
@@ -45,30 +62,33 @@ const UIMotivationalAgent = () => {
           body: JSON.stringify({
             contents: [
               {
-                parts: [{
-                  text: `Dame una lista de 5 frases motivacionales variadas, que incluyan:
-                    - Frases de libros famosos.
-                    - Frases inspiradoras de películas.
-                    - Citas de científicos o filósofos.
-                    - Frases de personajes históricos.
-                    - Reflexiones originales sobre la vida y la superación.
-
-                    No repitas frases ya mostradas: ${Array.from(shownQuotes).join(", ")}
-
-                    La respuesta debe estar en formato JSON exacto así:
-                    \`\`\`json
-                    {
-                      "frases": [
-                        "Frase 1 - Autor/Fuente",
-                        "Frase 2 - Autor/Fuente",
-                        "Frase 3 - Autor/Fuente",
-                        "Frase 4 - Autor/Fuente",
-                        "Frase 5 - Autor/Fuente"
-                      ]
-                    }
-                    \`\`\`
-                  `
-                }],
+                parts: [
+                  {
+                    text: `Dame una lista de 5 frases variadas, que incluyan:
+                      - Frases de libros famosos.
+                      - Frases inspiradoras de películas.
+                      - Citas de científicos o filósofos.
+                      - Frases de personajes históricos.
+                      - Reflexiones originales sobre la vida y la superación.
+                      - Pasajes de la Biblia (pueden ser motivacionales, reflexivos o de cualquier otro tipo relevante).
+  
+                      No repitas frases ya mostradas: ${Array.from(shownQuotes).join(", ")}
+  
+                      La respuesta debe estar en formato JSON exacto así:
+                      \`\`\`json
+                      {
+                        "frases": [
+                          "Frase 1 - Autor/Fuente",
+                          "Frase 2 - Autor/Fuente",
+                          "Frase 3 - Autor/Fuente",
+                          "Frase 4 - Autor/Fuente",
+                          "Frase 5 - Autor/Fuente"
+                        ]
+                      }
+                      \`\`\`
+                    `,
+                  },
+                ],
               },
             ],
           }),
@@ -88,6 +108,7 @@ const UIMotivationalAgent = () => {
       setQuotes(["Error al obtener frases."]);
     }
   };
+
 
   useEffect(() => {
     if (quotes.length === 0) fetchQuotes();
@@ -115,6 +136,20 @@ const UIMotivationalAgent = () => {
     return () => clearInterval(bgInterval);
   }, []);
 
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const hours = now.getHours().toString().padStart(2, "0");
+      const minutes = now.getMinutes().toString().padStart(2, "0");
+      setCurrentTime(`${hours}:${minutes}`);
+    };
+
+    updateTime();
+    const interval = setInterval(updateTime, 60 * 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
   const getQuoteParts = (quote) => {
     if (!quote) return ["Cargando frases...", ""];
     const cleanedQuote = quote.replace(/^"+|"+$/g, "");
@@ -126,13 +161,23 @@ const UIMotivationalAgent = () => {
 
   return (
     <div className={`flex flex-col items-center justify-center h-screen sm:min-h-[80vh] min-h-[calc(100vh-50px)] transition-all duration-1000 ${backgroundClass} text-center p-4`}>
-      <h1 className="text-3xl font-bold mb-6 flex items-center gap-2">
+      <p className={`text-[5rem] ${backgroundClass} font-semibold`}>{currentTime}</p>
+
+      <h1 className="lg:text-3xl text-[1.5rem] font-bold mb-6 flex items-center gap-2">
         {getGreeting()}
       </h1>
-      <div className={`${backgroundClass} text-center p-2 shadow-md max-w-lg`}>
-        <p className="text-md italic">{quoteText}</p>
-        {quoteAuthor && <p className={`text-[0.7rem] ${backgroundClass} mt-2`}>— {quoteAuthor}</p>}
+      <div className={`${backgroundClass} text-center p-2 flex flex-col justify-around items-center lg:shadow-md max-w-lg h-[8rem]`}>
+        <p className="lg:text-sm text-[0.8rem] italic">{quoteText}</p>
+
+        {quoteAuthor && <p className={`text-[0.7rem] ${backgroundClass} mt-2`}>{quoteAuthor}</p>}
       </div>
+      <button
+        onClick={takeScreenshot}
+        className={`mt-4 ${backgroundClass} px-4 py-2 shadow-md rounded-lg lg:hidden block`}
+      >
+        📸
+      </button>
+
     </div>
   );
 };
