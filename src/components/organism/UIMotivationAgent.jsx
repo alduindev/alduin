@@ -160,7 +160,7 @@ const UIMotivationalAgent = () => {
   const [quoteText, quoteAuthor] = getQuoteParts(quotes[currentQuoteIndex]);
 
   return (
-    <div className={`flex flex-col items-center justify-center h-screen sm:min-h-[80vh] min-h-[calc(100vh-50px)] transition-all duration-1000 ${backgroundClass} text-center p-4`}>
+    <div ref={screenshotRef} className={`flex flex-col items-center justify-center h-screen sm:min-h-[80vh] min-h-[calc(100vh-50px)] transition-all duration-1000 ${backgroundClass} text-center p-4`}>
       <p className={`text-[5rem] ${backgroundClass} font-semibold`}>{currentTime}</p>
 
       <h1 className="lg:text-3xl text-[1.5rem] font-bold mb-6 flex items-center gap-2">
