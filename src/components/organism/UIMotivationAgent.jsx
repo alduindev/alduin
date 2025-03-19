@@ -39,32 +39,47 @@ const UIMotivationalAgent = () => {
     }
   };
 
-  const takeScreenshot = async () => {
-    if (screenshotRef.current) {
-      const canvas = await html2canvas(screenshotRef.current);
-      const image = canvas.toDataURL("image/png");
+  const takeRealScreenshot = async () => {
+    try {
+      // Solicitar permisos para capturar la pantalla
+      const stream = await navigator.mediaDevices.getDisplayMedia({ video: true });
+      const track = stream.getVideoTracks()[0];
+      const imageCapture = new ImageCapture(track);
   
-      // Copiar al portapapeles en lugar de descargar
-      try {
-        const response = await fetch(image);
-        const blob = await response.blob();
-        await navigator.clipboard.write([
-          new ClipboardItem({ "image/png": blob }),
-        ]);
-        alert("📸 Captura copiada al portapapeles.");
-      } catch (err) {
-        console.error("Error al copiar la imagen:", err);
-        alert("No se pudo copiar la captura. Intenta descargarla.");
-        
-        // Fallback: Descargar imagen si no se puede copiar
-        const link = document.createElement("a");
-        link.href = image;
-        link.download = "frase.png";
-        link.click();
-      }
+      // Capturar una imagen de la pantalla
+      const bitmap = await imageCapture.grabFrame();
+      track.stop(); // Detener la captura de pantalla después de tomar la imagen
+  
+      // Convertir a canvas
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      const ctx = canvas.getContext("2d");
+      ctx.drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  
+      // Convertir a PNG
+      canvas.toBlob(async (blob) => {
+        try {
+          // Intentar copiar al portapapeles
+          await navigator.clipboard.write([
+            new ClipboardItem({ "image/png": blob }),
+          ]);
+          alert("📸 Captura copiada al portapapeles.");
+        } catch (err) {
+          console.warn("No se pudo copiar, descargando en su lugar.");
+  
+          // Fallback: Descargar imagen si no se puede copiar
+          const link = document.createElement("a");
+          link.href = URL.createObjectURL(blob);
+          link.download = "captura_pantalla.png";
+          link.click();
+        }
+      }, "image/png");
+    } catch (err) {
+      console.error("Error al capturar la pantalla:", err);
+      alert("⚠ No se pudo tomar la captura de pantalla.");
     }
   };
-  
 
   const fetchQuotes = async () => {
     try {
