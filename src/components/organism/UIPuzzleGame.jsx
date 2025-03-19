@@ -178,6 +178,19 @@ const UIPuzzleGame = () => {
     drawPuzzle(image, tiles, CANVAS_SIZE / GRID_SIZE);
   };
 
+  const resetGame = () => {
+    setGameStarted(false);
+    setGameWon(false);
+    setLost(false);
+    setGameTime(GAME_TIME);
+    setPieces([]);
+    setEmptyIndex(EMPTY_TILE);
+    setImage(null);
+    setImageURL(null);
+    setImageLoaded(false);
+    fetchRandomImage();
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       {!gameStarted && imageLoaded && !gameWon && !lost && (
@@ -227,6 +240,18 @@ const UIPuzzleGame = () => {
             moveTile(row * GRID_SIZE + col);
           }}
         />
+      )}
+      {(gameWon || lost) && (
+        <button
+          onClick={resetGame}
+          className="mt-4 px-6 py-2 font-bold text-gray-800 transition-all
+      rounded-[15%] bg-gradient-to-br from-white to-gray-300
+      shadow-[1px_1px_15px_#D9DADE,-1px_-1px_8px_#FFFFFF]
+      hover:bg-[#EEF0F4] hover:shadow-[inset_9.91px_9.91px_15px_#D9DADE,inset_-9.91px_-9.91px_15px_#FFFFFF]
+      active:bg-[#EEF0F4] active:shadow-[inset_9.91px_9.91px_15px_#D9DADE,inset_-9.91px_-9.91px_15px_#FFFFFF]"
+        >
+          Reiniciar
+        </button>
       )}
     </div>
   );
