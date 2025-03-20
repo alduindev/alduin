@@ -260,7 +260,7 @@ const UIPuzzleGame = () => {
 
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center text-green-900">
             <h2 className="text-2xl font-bold mb-4">Puntuación</h2>
             <div className="w-full max-w-md mx-auto">
               <table className="w-full border-collapse border border-gray-300 text-center">
