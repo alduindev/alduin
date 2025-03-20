@@ -5,7 +5,7 @@
   "homepage": "https://alduindev.github.io/alduin/",
   "scripts": {
     "dev": "concurrently \"node obtenerDatosapi.js\" \"env-cmd -f ./src/environments/.env.dev vite\"",
-    "build": "env-cmd -f ./src/environments/.env.dev vite build && node obtenerDatosapi.js",
+    "build": "env-cmd -f ./src/environments/.env.dev vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "postbuild": "cp build/index.html build/404.html",
