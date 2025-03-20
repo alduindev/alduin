@@ -255,7 +255,7 @@ const UIPuzzleGame = () => {
           />
 
           {gameWon && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#ffffff3f] bg-opacity-90 text-center p-6 rounded-lg shadow-lg">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#ffffff3f] bg-opacity-90 text-center p-6 rounded-lg shadow-lg z-10">
               <h2 className="text-3xl font-bold text-green-600">
                 🎉 ¡FELICIDADES! 🎉
               </h2>
