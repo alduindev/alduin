@@ -370,7 +370,7 @@ const UIPuzzleGame = () => {
           <img
             src={imageURL}
             alt="Referencia"
-            className="lg:w-[20rem] w-[10rem] h-auto border border-black rounded mb-4"
+            className="xl:w-[20rem] w-[10rem] h-auto border border-black rounded mb-4"
           />
 
           {gameWon && (
@@ -398,7 +398,7 @@ const UIPuzzleGame = () => {
             </div>
           )}
           {!gameStarted && (
-            <div className="flex items-center justify-around xl:w-[30%] w-[90%] gap-4">
+            <div className="flex items-center justify-around w-[30%] gap-4">
               <button
                 onClick={() => {
                   if (progress[selectedLevel]?.[selectedSublevel]?.bestTime) {
@@ -431,7 +431,7 @@ const UIPuzzleGame = () => {
               </button>
             </div>
           )}
-          <div className="p-4 scale-90">
+          <div className="scale-90">
             <canvas
               ref={canvasRef}
               className="border border-black bg-gray-700 w-full min-w-[300px] aspect-square"
