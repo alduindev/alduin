@@ -16,41 +16,52 @@ const COLORS = [
 ];
 
 const IMAGE_SOURCES = {
-  "A": [
-    { type: "dog", url: "https://picsum.photos/450/450?random&category=animals&subcategory=dog" },
-    { type: "cat", url: "https://picsum.photos/450/450?random&category=animals&subcategory=cat" }
+  A: [
+    {
+      type: "dog",
+      url: "https://picsum.photos/450/450?random&category=animals&subcategory=dog",
+    },
+    {
+      type: "cat",
+      url: "https://picsum.photos/450/450?random&category=animals&subcategory=cat",
+    },
   ],
-  "B": [
-    { type: "dog", url: "https://picsum.photos/450/450?random&category=animals&subcategory=dog" },
-    { type: "cat", url: "https://picsum.photos/450/450?random&category=animals&subcategory=cat" }
+  B: [
+    {
+      type: "dog",
+      url: "https://picsum.photos/450/450?random&category=animals&subcategory=dog",
+    },
+    {
+      type: "cat",
+      url: "https://picsum.photos/450/450?random&category=animals&subcategory=cat",
+    },
   ],
-  "C": [
-    { type: "dog", url: "https://picsum.photos/450/450?random&category=animals&subcategory=dog" },
-    { type: "cat", url: "https://picsum.photos/450/450?random&category=animals&subcategory=cat" }
+  C: [
+    {
+      type: "dog",
+      url: "https://picsum.photos/450/450?random&category=animals&subcategory=dog",
+    },
+    {
+      type: "cat",
+      url: "https://picsum.photos/450/450?random&category=animals&subcategory=cat",
+    },
   ],
-  "D": [
-    { type: "album", url: "https://via.assets.so/album.png?id" }
-  ],
-  "E": [
-    { type: "album", url: "https://via.assets.so/album.png?id" }
-  ],
-  "F": [
-    { type: "album", url: "https://via.assets.so/album.png?id" }
-  ],
-  "G": [
+  D: [{ type: "album", url: "https://via.assets.so/album.png?id" }],
+  E: [{ type: "album", url: "https://via.assets.so/album.png?id" }],
+  F: [{ type: "album", url: "https://via.assets.so/album.png?id" }],
+  G: [
     { type: "game", url: "https://via.assets.so/game.png?id=" },
-    { type: "movie", url: "https://via.assets.so/movie.png?id=" }
+    { type: "movie", url: "https://via.assets.so/movie.png?id=" },
   ],
-  "H": [
+  H: [
     { type: "game", url: "https://via.assets.so/game.png?id=" },
-    { type: "movie", url: "https://via.assets.so/movie.png?id=" }
+    { type: "movie", url: "https://via.assets.so/movie.png?id=" },
   ],
-  "I": [
+  I: [
     { type: "game", url: "https://via.assets.so/game.png?id=" },
-    { type: "movie", url: "https://via.assets.so/movie.png?id=" }
-  ]
+    { type: "movie", url: "https://via.assets.so/movie.png?id=" },
+  ],
 };
-
 
 const UIPuzzleGame = () => {
   const canvasRef = useRef(null);
@@ -68,6 +79,8 @@ const UIPuzzleGame = () => {
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isPaused, setIsPaused] = useState(false);
 
   useEffect(() => {
     const savedProgress =
@@ -90,6 +103,16 @@ const UIPuzzleGame = () => {
     setIsDarkMode(!isDarkMode);
   };
 
+  const pauseGame = () => {
+    setIsPaused(true);
+    clearInterval(timer); // Detiene el temporizador
+  };
+
+  const resumeGame = () => {
+    setIsPaused(false);
+    startTimer(); // Reanuda el temporizador
+  };
+
   useEffect(() => {
     if (selectedSublevel) {
       fetchRandomImage();
@@ -97,18 +120,19 @@ const UIPuzzleGame = () => {
   }, [selectedSublevel]);
 
   const fetchRandomImage = () => {
-  const imagesForLevel = IMAGE_SOURCES[selectedLevel];
-  const selectedImage = imagesForLevel[selectedSublevel - 1];
+    setIsLoading(true);
+    const imagesForLevel = IMAGE_SOURCES[selectedLevel];
+    const selectedImage = imagesForLevel[selectedSublevel - 1];
 
-  const img = new Image();
-  img.src = selectedImage.url;
-  img.onload = () => {
-    setImageURL(img.src);
-    setImage(img);
-    drawOriginalImage(img);
+    const img = new Image();
+    img.src = selectedImage.url;
+    img.onload = () => {
+      setImageURL(img.src);
+      setImage(img);
+      drawOriginalImage(img);
+      setIsLoading(false);
+    };
   };
-  };
-  
 
   const drawOriginalImage = (img) => {
     const canvas = canvasRef.current;
@@ -138,7 +162,7 @@ const UIPuzzleGame = () => {
   };
 
   const startTimer = () => {
-    const startTime = Date.now();
+    const startTime = Date.now() - elapsedTime * 1000;
     const interval = setInterval(() => {
       setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
     }, 1000);
@@ -219,11 +243,11 @@ const UIPuzzleGame = () => {
   };
 
   const moveTile = (index) => {
-    if (!gameStarted) return;
-
+    if (!gameStarted || isPaused) return; // Bloquea si el juego está pausado
+  
     const neighbors = getMovableTiles(index);
     if (!neighbors.includes(emptyIndex)) return;
-
+  
     const newTiles = [...pieces];
     [newTiles[index], newTiles[emptyIndex]] = [
       newTiles[emptyIndex],
@@ -232,17 +256,17 @@ const UIPuzzleGame = () => {
     setPieces(newTiles);
     setEmptyIndex(index);
     drawPuzzle(image, newTiles, CANVAS_SIZE / gridSize);
-
+  
     if (newTiles.every((tile, i) => tile === i)) {
       stopTimer();
       setGameWon(true);
-
+  
       const updatedProgress = { ...progress };
-
+  
       if (!updatedProgress[selectedLevel]) {
         updatedProgress[selectedLevel] = {};
       }
-
+  
       if (
         !updatedProgress[selectedLevel][selectedSublevel] ||
         elapsedTime < updatedProgress[selectedLevel][selectedSublevel].bestTime
@@ -252,7 +276,7 @@ const UIPuzzleGame = () => {
           bestTime: elapsedTime,
         };
       }
-
+  
       localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
       setProgress(updatedProgress);
     }
@@ -290,94 +314,96 @@ const UIPuzzleGame = () => {
 
   return (
     <div
-    className={`flex flex-col items-center justify-center min-h-screen transition-all duration-700 ${
-      isDarkMode
-        ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
-        : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
-    }`}
-    style={{ overflow: "hidden" }}
-  >
-    <h1 className="lg:text-[4rem] text-[3rem] max-w-full text-center">MAGICPUZZLE</h1>
-  
-    <button
-      onClick={() => setShowModal(true)}
-      className="absolute top-6 right-6 p-2 bg-gray-200 text-white rounded-full shadow-lg hover:bg-gray-100 transition"
+      className={`flex flex-col items-center justify-center min-h-screen transition-all duration-700 ${
+        isDarkMode
+          ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
+          : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
+      }`}
+      style={{ overflow: "hidden" }}
     >
-      <img
-        src="assets/icon/ico_gear.svg"
-        alt="Configuración"
-        className="w-8 h-8"
-      />
-    </button>
-  
-    {showModal && (
-      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
-        <div className="bg-white p-6 rounded-lg shadow-lg text-center text-green-900 xl:w-auto w-[90%]">
-          <h2 className="text-2xl font-bold mb-4">Puntuación</h2>
-          <div className="w-full overflow-x-auto">
-            <table className="w-full border-collapse border border-gray-300 text-center">
-              <thead>
-                <tr className="bg-gray-200">
-                  <th className="p-2 border border-gray-300">Nivel</th>
-                  <th className="p-2 border border-gray-300">Subnivel</th>
-                  <th className="p-2 border border-gray-300">Tiempo</th>
-                </tr>
-              </thead>
-              <tbody>
-                {Object.entries(progress).map(([level, sublevels]) => (
-                  <React.Fragment key={level}>
-                    <tr
-                      onClick={() => toggleLevel(level)}
-                      className="cursor-pointer bg-gray-100 hover:bg-gray-300 transition-colors"
-                    >
-                      <td
-                        className="p-2 border border-gray-300 font-bold"
-                        colSpan={3}
+      <h1 className="lg:text-[4rem] text-[3rem] max-w-full text-center">
+        MAGICPUZZLE
+      </h1>
+
+      <button
+        onClick={() => setShowModal(true)}
+        className="absolute top-6 right-6 p-2 bg-gray-200 text-white rounded-full shadow-lg hover:bg-gray-100 transition"
+      >
+        <img
+          src="assets/icon/ico_gear.svg"
+          alt="Configuración"
+          className="w-8 h-8"
+        />
+      </button>
+
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center text-green-900 xl:w-auto w-[90%]">
+            <h2 className="text-2xl font-bold mb-4">Puntuación</h2>
+            <div className="w-full overflow-x-auto">
+              <table className="w-full border-collapse border border-gray-300 text-center">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="p-2 border border-gray-300">Nivel</th>
+                    <th className="p-2 border border-gray-300">Subnivel</th>
+                    <th className="p-2 border border-gray-300">Tiempo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(progress).map(([level, sublevels]) => (
+                    <React.Fragment key={level}>
+                      <tr
+                        onClick={() => toggleLevel(level)}
+                        className="cursor-pointer bg-gray-100 hover:bg-gray-300 transition-colors"
                       >
-                        {expandedLevels[level] ? "▼" : "▶"} Nivel {level}
-                      </td>
-                    </tr>
-                    {expandedLevels[level] &&
-                      Object.entries(sublevels).map(([sublevel, data]) => (
-                        <tr key={`${level}-${sublevel}`} className="bg-white">
-                          <td className="p-2 border border-gray-300">
-                            {level}
-                          </td>
-                          <td className="p-2 border border-gray-300">
-                            {sublevel}
-                          </td>
-                          <td className="p-2 border border-gray-300">
-                            {data.bestTime
-                              ? `${data.bestTime}s`
-                              : "No completado"}
-                          </td>
-                        </tr>
-                      ))}
-                  </React.Fragment>
-                ))}
-              </tbody>
-            </table>
+                        <td
+                          className="p-2 border border-gray-300 font-bold"
+                          colSpan={3}
+                        >
+                          {expandedLevels[level] ? "▼" : "▶"} Nivel {level}
+                        </td>
+                      </tr>
+                      {expandedLevels[level] &&
+                        Object.entries(sublevels).map(([sublevel, data]) => (
+                          <tr key={`${level}-${sublevel}`} className="bg-white">
+                            <td className="p-2 border border-gray-300">
+                              {level}
+                            </td>
+                            <td className="p-2 border border-gray-300">
+                              {sublevel}
+                            </td>
+                            <td className="p-2 border border-gray-300">
+                              {data.bestTime
+                                ? `${data.bestTime}s`
+                                : "No completado"}
+                            </td>
+                          </tr>
+                        ))}
+                    </React.Fragment>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <button
+              className="mt-4 px-6 py-2 bg-yellow-500 text-white rounded-lg mr-2"
+              onClick={() => {
+                localStorage.removeItem("puzzleProgress");
+                setProgress({});
+              }}
+            >
+              Reiniciar
+            </button>
+
+            <button
+              className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg"
+              onClick={() => setShowModal(false)}
+            >
+              Cerrar
+            </button>
           </div>
-  
-          <button
-            className="mt-4 px-6 py-2 bg-yellow-500 text-white rounded-lg mr-2"
-            onClick={() => {
-              localStorage.removeItem("puzzleProgress");
-              setProgress({});
-            }}
-          >
-            Reiniciar
-          </button>
-  
-          <button
-            className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg"
-            onClick={() => setShowModal(false)}
-          >
-            Cerrar
-          </button>
         </div>
-      </div>
-    )}
+      )}
 
       {!selectedLevel ? (
         <div className="py-4">
@@ -435,11 +461,20 @@ const UIPuzzleGame = () => {
             {selectedLevel} {selectedSublevel}
           </h2>
           <p className="text-[2rem] font-semibold">⏱{elapsedTime}s</p>
-          <img
-            src={imageURL}
-            alt="Referencia"
-            className="xl:w-[10rem] w-[10rem] h-auto border border-black rounded mb-4"
-          />
+          {isLoading ? (
+            <div className="w-[10rem] h-[10rem] flex flex-col items-center justify-center m-6">
+              <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+              <p className="mt-2 text-gray-500 text-sm font-semibold">
+                Descargando imagen...
+              </p>
+            </div>
+          ) : (
+            <img
+              src={imageURL}
+              alt="Referencia"
+              className="xl:w-[10rem] w-[10rem] h-auto border border-black rounded mb-4"
+            />
+          )}
 
           {gameWon && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#ffffff3f] bg-opacity-90 text-center p-6 rounded-lg shadow-lg z-10">
@@ -465,6 +500,17 @@ const UIPuzzleGame = () => {
               </button>
             </div>
           )}
+          {gameStarted && (
+            <div className="md:w-[20%] w-[90%] ">
+              <button
+              onClick={isPaused ? resumeGame : pauseGame}
+              className="px-6 py-2 font-bold bg-yellow-500 text-white rounded-lg w-full"
+            >
+              {isPaused ? "Reanudar" : "Pausar"}
+            </button>
+            </div>
+          )}
+
           {!gameStarted && (
             <div className="flex items-center justify-around md:w-[20%] w-[90%] gap-4">
               <button
@@ -499,7 +545,16 @@ const UIPuzzleGame = () => {
               </button>
             </div>
           )}
-          <div className="scale-90">
+          <div className="relative scale-90">
+            {isLoading && (
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 bg-opacity-75 rounded-md">
+                <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                <p className="mt-2 text-white text-sm font-semibold">
+                  Cargando puzzle...
+                </p>
+              </div>
+            )}
+
             <canvas
               ref={canvasRef}
               className="border border-black bg-gray-700 w-full min-w-[300px] aspect-square"
