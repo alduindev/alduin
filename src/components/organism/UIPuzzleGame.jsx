@@ -1,11 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 
-
-const ALBUM_IMAGE_URL = "https://via.assets.so/album.png?id";
-const GAME_IMAGE_URL = "https://via.assets.so/game.png?id=";
-const MOVIE_IMAGE_URL = "https://via.assets.so/movie.png?id=";
 const CANVAS_SIZE = 450;
-const GAME_TIME = 160;
 const LEVELS = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
 const SUBLEVELS = 9;
 const COLORS = [
@@ -102,20 +97,16 @@ const UIPuzzleGame = () => {
   }, [selectedSublevel]);
 
   const fetchRandomImage = () => {
-    // Selecciona el conjunto de imágenes según el nivel
-    const imagesForLevel = IMAGE_SOURCES[selectedLevel]; // Usamos selectedLevel para obtener el nivel actual
-  
-    // Selección aleatoria de una de las imágenes disponibles para el nivel
-    const randomImage = imagesForLevel[Math.floor(Math.random() * imagesForLevel.length)];
-  
-    // Asignamos la URL de la imagen seleccionada
-    const img = new Image();
-    img.src = randomImage.url;
-    img.onload = () => {
-      setImageURL(img.src);
-      setImage(img);
-      drawOriginalImage(img);
-    };
+  const imagesForLevel = IMAGE_SOURCES[selectedLevel];
+  const selectedImage = imagesForLevel[selectedSublevel - 1];
+
+  const img = new Image();
+  img.src = selectedImage.url;
+  img.onload = () => {
+    setImageURL(img.src);
+    setImage(img);
+    drawOriginalImage(img);
+  };
   };
   
 
@@ -304,7 +295,7 @@ const UIPuzzleGame = () => {
         ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
         : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
     }`}
-    style={{ overflow: "hidden" }} // Para evitar el desbordamiento
+    style={{ overflow: "hidden" }}
   >
     <h1 className="lg:text-[4rem] text-[3rem] max-w-full text-center">MAGICPUZZLE</h1>
   
