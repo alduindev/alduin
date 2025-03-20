@@ -1,6 +1,8 @@
 import React, { useRef, useEffect, useState } from "react";
 
-const PLACE_DOG_URL = "https://via.assets.so/game.png?id=";
+
+const ALBUM_IMAGE_URL = "https://via.assets.so/album.png?id";
+const GAME_IMAGE_URL = "https://via.assets.so/game.png?id=";
 const MOVIE_IMAGE_URL = "https://via.assets.so/movie.png?id=";
 const CANVAS_SIZE = 450;
 const GAME_TIME = 160;
@@ -17,6 +19,43 @@ const COLORS = [
   "bg-gray-500",
   "bg-teal-500",
 ];
+
+const IMAGE_SOURCES = {
+  "A": [
+    { type: "dog", url: "https://picsum.photos/450/450?random&category=animals&subcategory=dog" },
+    { type: "cat", url: "https://picsum.photos/450/450?random&category=animals&subcategory=cat" }
+  ],
+  "B": [
+    { type: "dog", url: "https://picsum.photos/450/450?random&category=animals&subcategory=dog" },
+    { type: "cat", url: "https://picsum.photos/450/450?random&category=animals&subcategory=cat" }
+  ],
+  "C": [
+    { type: "dog", url: "https://picsum.photos/450/450?random&category=animals&subcategory=dog" },
+    { type: "cat", url: "https://picsum.photos/450/450?random&category=animals&subcategory=cat" }
+  ],
+  "D": [
+    { type: "album", url: "https://via.assets.so/album.png?id" }
+  ],
+  "E": [
+    { type: "album", url: "https://via.assets.so/album.png?id" }
+  ],
+  "F": [
+    { type: "album", url: "https://via.assets.so/album.png?id" }
+  ],
+  "G": [
+    { type: "game", url: "https://via.assets.so/game.png?id=" },
+    { type: "movie", url: "https://via.assets.so/movie.png?id=" }
+  ],
+  "H": [
+    { type: "game", url: "https://via.assets.so/game.png?id=" },
+    { type: "movie", url: "https://via.assets.so/movie.png?id=" }
+  ],
+  "I": [
+    { type: "game", url: "https://via.assets.so/game.png?id=" },
+    { type: "movie", url: "https://via.assets.so/movie.png?id=" }
+  ]
+};
+
 
 const UIPuzzleGame = () => {
   const canvasRef = useRef(null);
@@ -63,21 +102,22 @@ const UIPuzzleGame = () => {
   }, [selectedSublevel]);
 
   const fetchRandomImage = () => {
-    const isDog = Math.random() < 0.5;
-    const randomMovieID = Math.floor(Math.random() * 100) + 1;
-    const randomGameID = Math.floor(Math.random() * 100) + 1;
-    const imgSrc = isDog
-      ? `${PLACE_DOG_URL}${randomGameID}&q=95&w=450&h=450&fit=fill`
-      : `${MOVIE_IMAGE_URL}${randomMovieID}&q=95&w=450&h=450&fit=fill`;
-
+    // Selecciona el conjunto de imágenes según el nivel
+    const imagesForLevel = IMAGE_SOURCES[selectedLevel]; // Usamos selectedLevel para obtener el nivel actual
+  
+    // Selección aleatoria de una de las imágenes disponibles para el nivel
+    const randomImage = imagesForLevel[Math.floor(Math.random() * imagesForLevel.length)];
+  
+    // Asignamos la URL de la imagen seleccionada
     const img = new Image();
-    img.src = imgSrc;
+    img.src = randomImage.url;
     img.onload = () => {
       setImageURL(img.src);
       setImage(img);
       drawOriginalImage(img);
     };
   };
+  
 
   const drawOriginalImage = (img) => {
     const canvas = canvasRef.current;
