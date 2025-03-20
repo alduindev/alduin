@@ -16,52 +16,17 @@ const COLORS = [
 ];
 
 const IMAGE_SOURCES = {
-  A: [
-    {
-      type: "dog",
-      url: "https://picsum.photos/450/450?random&category=animals&subcategory=dog",
-    },
-    {
-      type: "cat",
-      url: "https://picsum.photos/450/450?random&category=animals&subcategory=cat",
-    },
-  ],
-  B: [
-    {
-      type: "dog",
-      url: "https://picsum.photos/450/450?random&category=animals&subcategory=dog",
-    },
-    {
-      type: "cat",
-      url: "https://picsum.photos/450/450?random&category=animals&subcategory=cat",
-    },
-  ],
-  C: [
-    {
-      type: "dog",
-      url: "https://picsum.photos/450/450?random&category=animals&subcategory=dog",
-    },
-    {
-      type: "cat",
-      url: "https://picsum.photos/450/450?random&category=animals&subcategory=cat",
-    },
-  ],
-  D: [{ type: "album", url: "https://via.assets.so/album.png?id" }],
-  E: [{ type: "album", url: "https://via.assets.so/album.png?id" }],
-  F: [{ type: "album", url: "https://via.assets.so/album.png?id" }],
-  G: [
-    { type: "game", url: "https://via.assets.so/game.png?id=" },
-    { type: "movie", url: "https://via.assets.so/movie.png?id=" },
-  ],
-  H: [
-    { type: "game", url: "https://via.assets.so/game.png?id=" },
-    { type: "movie", url: "https://via.assets.so/movie.png?id=" },
-  ],
-  I: [
-    { type: "game", url: "https://via.assets.so/game.png?id=" },
-    { type: "movie", url: "https://via.assets.so/movie.png?id=" },
-  ],
+  A: [{ type: "animal", url: "https://picsum.photos/450/450?random&category=animals" }],
+  B: [{ type: "animal", url: "https://picsum.photos/450/450?random&category=animals" }],
+  C: [{ type: "animal", url: "https://picsum.photos/450/450?random&category=animals" }],
+  D: [{ type: "album", url: "https://via.assets.so/album.png?id=" }],
+  E: [{ type: "album", url: "https://via.assets.so/album.png?id=" }],
+  F: [{ type: "album", url: "https://via.assets.so/album.png?id=" }],
+  G: [{ type: "game", url: "https://via.assets.so/game.png?id=" }],
+  H: [{ type: "game", url: "https://via.assets.so/game.png?id=" }],
+  I: [{ type: "game", url: "https://via.assets.so/game.png?id=" }],
 };
+
 
 const UIPuzzleGame = () => {
   const canvasRef = useRef(null);
@@ -121,15 +86,34 @@ const UIPuzzleGame = () => {
 
   const fetchRandomImage = () => {
     setIsLoading(true);
-    const imagesForLevel = IMAGE_SOURCES[selectedLevel];
-    const selectedImage = imagesForLevel[selectedSublevel - 1];
-
+  
+    if (!selectedLevel || !selectedSublevel) {
+      console.error("Error: Nivel o subnivel no seleccionados");
+      setIsLoading(false);
+      return;
+    }
+  
+    const baseImage = IMAGE_SOURCES[selectedLevel]?.[0]; // Tomamos la única URL base del nivel
+    if (!baseImage) {
+      console.error(`Error: No hay imagen definida para el nivel ${selectedLevel}`);
+      setIsLoading(false);
+      return;
+    }
+  
+    // Generar URL aleatoria para cada subnivel
+    const randomUrl = `${baseImage.url}&random=${selectedSublevel}`;
+  
     const img = new Image();
-    img.src = selectedImage.url;
+    img.src = randomUrl;
     img.onload = () => {
       setImageURL(img.src);
       setImage(img);
       drawOriginalImage(img);
+      setIsLoading(false);
+    };
+  
+    img.onerror = () => {
+      console.error("Error: No se pudo cargar la imagen", randomUrl);
       setIsLoading(false);
     };
   };
@@ -244,10 +228,10 @@ const UIPuzzleGame = () => {
 
   const moveTile = (index) => {
     if (!gameStarted || isPaused) return;
-
+  
     const neighbors = getMovableTiles(index);
     if (!neighbors.includes(emptyIndex)) return;
-
+  
     const newTiles = [...pieces];
     [newTiles[index], newTiles[emptyIndex]] = [
       newTiles[emptyIndex],
@@ -256,17 +240,17 @@ const UIPuzzleGame = () => {
     setPieces(newTiles);
     setEmptyIndex(index);
     drawPuzzle(image, newTiles, CANVAS_SIZE / gridSize);
-
+  
     if (newTiles.every((tile, i) => tile === i)) {
       stopTimer();
       setGameWon(true);
-
+  
       const updatedProgress = { ...progress };
-
+  
       if (!updatedProgress[selectedLevel]) {
         updatedProgress[selectedLevel] = {};
       }
-
+  
       if (
         !updatedProgress[selectedLevel][selectedSublevel] ||
         elapsedTime < updatedProgress[selectedLevel][selectedSublevel].bestTime
@@ -276,7 +260,7 @@ const UIPuzzleGame = () => {
           bestTime: elapsedTime,
         };
       }
-
+  
       localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
       setProgress(updatedProgress);
     }
@@ -322,21 +306,24 @@ const UIPuzzleGame = () => {
       style={{ overflow: "hidden" }}
     >
       {Object.keys(progress).length > 0 && (
-        <button
-          onClick={() => setShowModal(true)}
-          className="lg:absolute top-6 md:right-6 p-2 lg:mt-0 mt-2 bg-gray-200 text-white rounded-full shadow-lg hover:bg-gray-100 transition"
-        >
-          <img
-            src="assets/icon/ico_gear.svg"
-            alt="Configuración"
-            className="lg:w-8 w-4 lg:h-8 h-4"
-          />
-        </button>
-      )}
+  <button
+    onClick={() => setShowModal(true)}
+    className="lg:absolute top-6 md:right-6 p-2 lg:mt-0 mt-2 bg-gray-200 text-white rounded-full shadow-lg hover:bg-gray-100 transition"
+  >
+    <img
+      src="assets/icon/ico_gear.svg"
+      alt="Configuración"
+      className="lg:w-8 w-4 lg:h-8 h-4"
+    />
+  </button>
+)}
+
 
       <h1 className="lg:text-[4rem] text-[3rem] max-w-full text-center">
         MAGICPUZZLE
       </h1>
+
+      
 
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
@@ -462,9 +449,7 @@ const UIPuzzleGame = () => {
           <h2 className="text-xl font-bold">
             {selectedLevel} {selectedSublevel}
           </h2>
-          <p className="md:text-[2rem] text-[1rem] font-semibold">
-            ⏱{elapsedTime}s
-          </p>
+          <p className="md:text-[2rem] text-[1rem] font-semibold">⏱{elapsedTime}s</p>
           {isLoading ? (
             <div className="w-[10rem] h-[10rem] flex flex-col items-center justify-center m-6">
               <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
@@ -507,11 +492,11 @@ const UIPuzzleGame = () => {
           {gameStarted && (
             <div className="md:w-[20%] w-[90%] ">
               <button
-                onClick={isPaused ? resumeGame : pauseGame}
-                className="px-6 py-2 font-bold bg-yellow-500 text-white rounded-lg w-full"
-              >
-                {isPaused ? "Reanudar" : "Pausar"}
-              </button>
+              onClick={isPaused ? resumeGame : pauseGame}
+              className="px-6 py-2 font-bold bg-yellow-500 text-white rounded-lg w-full"
+            >
+              {isPaused ? "Reanudar" : "Pausar"}
+            </button>
             </div>
           )}
 
@@ -591,9 +576,7 @@ const UIPuzzleGame = () => {
         </div>
       </div>
 
-      <p className="text-gray-300 mt-4 md:text-[1rem] text-[0.8rem] ">
-        V.1.0.2 - Creado con amor
-      </p>
+      <p className="text-gray-300 mt-4 md:text-[1rem] text-[0.8rem] ">V.1.0.2 - Creado con amor</p>
     </div>
   );
 };
