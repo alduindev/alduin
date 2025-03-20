@@ -1,6 +1,6 @@
 import React, { useRef, useEffect, useState } from "react";
 
-const PLACE_DOG_URL = "https://placedog.net/450/450?random";
+const PLACE_DOG_URL = "https://via.assets.so/game.png?id=";
 const MOVIE_IMAGE_URL = "https://via.assets.so/movie.png?id=";
 const CANVAS_SIZE = 450;
 const GAME_TIME = 160;
@@ -25,11 +25,16 @@ const UIPuzzleGame = () => {
   const [progress, setProgress] = useState({});
   const [timer, setTimer] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [isDarkMode, setIsDarkMode] = useState(false);
 
   useEffect(() => {
     const savedProgress = JSON.parse(localStorage.getItem("puzzleProgress")) || {};
     setProgress(savedProgress);
   }, []);
+
+  const toggleDarkMode = () => {
+    setIsDarkMode(!isDarkMode);
+  };
 
   useEffect(() => {
     if (selectedSublevel) {
@@ -40,8 +45,9 @@ const UIPuzzleGame = () => {
   const fetchRandomImage = () => {
     const isDog = Math.random() < 0.5;
     const randomMovieID = Math.floor(Math.random() * 100) + 1;
+    const randomGameID = Math.floor(Math.random() * 100) + 1;
     const imgSrc = isDog
-      ? `${PLACE_DOG_URL}&nocache=${Date.now()}`
+      ? `${PLACE_DOG_URL}${randomGameID}&q=95&w=450&h=450&fit=fill`
       : `${MOVIE_IMAGE_URL}${randomMovieID}&q=95&w=450&h=450&fit=fill`;
 
     const img = new Image();
@@ -195,10 +201,11 @@ const UIPuzzleGame = () => {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen">
-      <h1 className="lg:text-[4rem] text-[3rem] ">MAGICPUZZLE</h1>
+    <div className={`flex flex-col items-center justify-center lg:min-h-screen h-screen ${isDarkMode ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-900"}`}>
+      <h1 className="lg:text-[4rem] text-[3.5rem] ">MAGICPUZZLE</h1>
       {!selectedLevel ? (
-        <div className="grid grid-cols-3 gap-4">
+        <div className="py-4">
+          <div className="grid grid-cols-3 gap-4">
           {LEVELS.map((level, i) => {
             const isUnlocked = i === 0 || progress[LEVELS[i - 1]]?.[SUBLEVELS];
             return (
@@ -214,7 +221,9 @@ const UIPuzzleGame = () => {
             );
           })}
         </div>
+        </div>
       ) : !selectedSublevel ? (
+        <div className="py-4">
         <div className="grid grid-cols-3 gap-4">
           {Array.from({ length: SUBLEVELS }, (_, i) => {
             const isUnlocked = i === 0 || progress[selectedLevel]?.[i];
@@ -231,6 +240,7 @@ const UIPuzzleGame = () => {
               </button>
             );
           })}
+        </div>
         </div>
       ) : (
         <>
@@ -269,28 +279,35 @@ const UIPuzzleGame = () => {
           {!gameStarted && (
             <button
               onClick={startGame}
-              className="my-4 px-6 py-2 font-bold bg-blue-500 text-white rounded-lg"
+              className="px-6 py-2 font-bold bg-blue-500 text-white rounded-lg"
             >
               Jugar
             </button>
           )}
           <div className="p-4">
-          <canvas
-            ref={canvasRef}
-            className="border border-black bg-gray-700 w-full min-w-[300px] aspect-square"
-            onClick={(e) => {
-              const rect = canvasRef.current.getBoundingClientRect();
-              const x = e.clientX - rect.left;
-              const y = e.clientY - rect.top;
-              const pieceSize = rect.width / gridSize;
-              const col = Math.floor(x / pieceSize);
-              const row = Math.floor(y / pieceSize);
-              moveTile(row * gridSize + col);
-            }}
-          />
+            <canvas
+              ref={canvasRef}
+              className="border border-black bg-gray-700 w-full min-w-[300px] aspect-square"
+              onClick={(e) => {
+                const rect = canvasRef.current.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+                const pieceSize = rect.width / gridSize;
+                const col = Math.floor(x / pieceSize);
+                const row = Math.floor(y / pieceSize);
+                moveTile(row * gridSize + col);
+              }}
+            />
           </div>
         </>
       )}
+      <button
+        className="px-4 py-2 bg-gray-600 text-white rounded-lg"
+        onClick={toggleDarkMode}
+      >
+        {isDarkMode ? "Modo Día ☀️" : "Modo Noche 🌙"}
+      </button>
+      <p className="text-gray-300 mt-4">V.1.0.1 - Creado con amor</p>
     </div>
 
 
