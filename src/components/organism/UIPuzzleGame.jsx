@@ -248,12 +248,12 @@ const UIPuzzleGame = () => {
 
   return (
     <div
-  className={`flex flex-col items-center justify-center lg:min-h-screen h-screen transition-all duration-700 ${
-    isDarkMode
-      ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
-      : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
-  }`}
->
+      className={`flex flex-col items-center justify-center lg:min-h-screen h-screen transition-all duration-700 ${
+        isDarkMode
+          ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
+          : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
+      }`}
+    >
       <h1 className="lg:text-[4rem] text-[3rem] ">MAGICPUZZLE</h1>
 
       {
@@ -299,7 +299,9 @@ const UIPuzzleGame = () => {
                       {expandedLevels[level] &&
                         Object.entries(sublevels).map(([sublevel, data]) => (
                           <tr key={`${level}-${sublevel}`} className="bg-white">
-                            <td className="p-2 border border-gray-300">{level}</td>
+                            <td className="p-2 border border-gray-300">
+                              {level}
+                            </td>
                             <td className="p-2 border border-gray-300">
                               {sublevel}
                             </td>
@@ -474,12 +476,21 @@ const UIPuzzleGame = () => {
         </>
       )}
 
-      <button
-        className="px-4 py-2 bg-gray-600 text-white rounded-lg"
-        onClick={toggleDarkMode}
-      >
-        {isDarkMode ? "☀️" : "🌙"}
-      </button>
+<div
+  className={`relative w-14 h-7 flex items-center bg-gray-400 rounded-full p-1 cursor-pointer transition-all duration-500 ${
+    isDarkMode ? "bg-gray-800" : "bg-gray-300"
+  }`}
+  onClick={toggleDarkMode}
+>
+  <div
+    className={`w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-md transform transition-all duration-500 ${
+      isDarkMode ? "translate-x-7" : "translate-x-0"
+    }`}
+  >
+    {isDarkMode ? "🌙" : "☀️"}
+  </div>
+</div>
+
       <p className="text-gray-300 mt-4">V.1.0.2 - Creado con amor</p>
     </div>
   );
