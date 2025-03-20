@@ -299,95 +299,94 @@ const UIPuzzleGame = () => {
 
   return (
     <div
-      className={`flex flex-col items-center justify-center lg:min-h-screen h-screen transition-all duration-700 ${
-        isDarkMode
-          ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
-          : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
-      }`}
+    className={`flex flex-col items-center justify-center min-h-screen transition-all duration-700 ${
+      isDarkMode
+        ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
+        : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
+    }`}
+    style={{ overflow: "hidden" }} // Para evitar el desbordamiento
+  >
+    <h1 className="lg:text-[4rem] text-[3rem] max-w-full text-center">MAGICPUZZLE</h1>
+  
+    <button
+      onClick={() => setShowModal(true)}
+      className="absolute top-6 right-6 p-2 bg-gray-200 text-white rounded-full shadow-lg hover:bg-gray-100 transition"
     >
-      <h1 className="lg:text-[4rem] text-[3rem] ">MAGICPUZZLE</h1>
-
-      {
-        <button
-          onClick={() => setShowModal(true)}
-          className="absolute top-6 right-6 p-2 bg-gray-200 text-white rounded-full shadow-lg hover:bg-gray-100 transition"
-        >
-          <img
-            src="assets/icon/ico_gear.svg"
-            alt="Configuración"
-            className="w-8 h-8"
-          />
-        </button>
-      }
-
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center text-green-900 xl:w-auto w-[90%] ">
-            <h2 className="text-2xl font-bold mb-4">Puntuación</h2>
-            <div className="w-full overflow-x-auto">
-              <table className="w-full border-collapse border border-gray-300 text-center">
-                <thead>
-                  <tr className="bg-gray-200">
-                    <th className="p-2 border border-gray-300">Nivel</th>
-                    <th className="p-2 border border-gray-300">Subnivel</th>
-                    <th className="p-2 border border-gray-300">Tiempo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(progress).map(([level, sublevels]) => (
-                    <React.Fragment key={level}>
-                      <tr
-                        onClick={() => toggleLevel(level)}
-                        className="cursor-pointer bg-gray-100 hover:bg-gray-300 transition-colors"
+      <img
+        src="assets/icon/ico_gear.svg"
+        alt="Configuración"
+        className="w-8 h-8"
+      />
+    </button>
+  
+    {showModal && (
+      <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
+        <div className="bg-white p-6 rounded-lg shadow-lg text-center text-green-900 xl:w-auto w-[90%]">
+          <h2 className="text-2xl font-bold mb-4">Puntuación</h2>
+          <div className="w-full overflow-x-auto">
+            <table className="w-full border-collapse border border-gray-300 text-center">
+              <thead>
+                <tr className="bg-gray-200">
+                  <th className="p-2 border border-gray-300">Nivel</th>
+                  <th className="p-2 border border-gray-300">Subnivel</th>
+                  <th className="p-2 border border-gray-300">Tiempo</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(progress).map(([level, sublevels]) => (
+                  <React.Fragment key={level}>
+                    <tr
+                      onClick={() => toggleLevel(level)}
+                      className="cursor-pointer bg-gray-100 hover:bg-gray-300 transition-colors"
+                    >
+                      <td
+                        className="p-2 border border-gray-300 font-bold"
+                        colSpan={3}
                       >
-                        <td
-                          className="p-2 border border-gray-300 font-bold"
-                          colSpan={3}
-                        >
-                          {expandedLevels[level] ? "▼" : "▶"} Nivel {level}
-                        </td>
-                      </tr>
-                      {expandedLevels[level] &&
-                        Object.entries(sublevels).map(([sublevel, data]) => (
-                          <tr key={`${level}-${sublevel}`} className="bg-white">
-                            <td className="p-2 border border-gray-300">
-                              {level}
-                            </td>
-                            <td className="p-2 border border-gray-300">
-                              {sublevel}
-                            </td>
-                            <td className="p-2 border border-gray-300">
-                              {data.bestTime
-                                ? `${data.bestTime}s`
-                                : "No completado"}
-                            </td>
-                          </tr>
-                        ))}
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <button
-              className="mt-4 px-6 py-2 bg-yellow-500 text-white rounded-lg mr-2"
-              onClick={() => {
-                localStorage.removeItem("puzzleProgress");
-                setProgress({});
-              }}
-            >
-              Reiniciar
-            </button>
-
-            <button
-              className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg"
-              onClick={() => setShowModal(false)}
-            >
-              Cerrar
-            </button>
+                        {expandedLevels[level] ? "▼" : "▶"} Nivel {level}
+                      </td>
+                    </tr>
+                    {expandedLevels[level] &&
+                      Object.entries(sublevels).map(([sublevel, data]) => (
+                        <tr key={`${level}-${sublevel}`} className="bg-white">
+                          <td className="p-2 border border-gray-300">
+                            {level}
+                          </td>
+                          <td className="p-2 border border-gray-300">
+                            {sublevel}
+                          </td>
+                          <td className="p-2 border border-gray-300">
+                            {data.bestTime
+                              ? `${data.bestTime}s`
+                              : "No completado"}
+                          </td>
+                        </tr>
+                      ))}
+                  </React.Fragment>
+                ))}
+              </tbody>
+            </table>
           </div>
+  
+          <button
+            className="mt-4 px-6 py-2 bg-yellow-500 text-white rounded-lg mr-2"
+            onClick={() => {
+              localStorage.removeItem("puzzleProgress");
+              setProgress({});
+            }}
+          >
+            Reiniciar
+          </button>
+  
+          <button
+            className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg"
+            onClick={() => setShowModal(false)}
+          >
+            Cerrar
+          </button>
         </div>
-      )}
+      </div>
+    )}
 
       {!selectedLevel ? (
         <div className="py-4">
@@ -448,7 +447,7 @@ const UIPuzzleGame = () => {
           <img
             src={imageURL}
             alt="Referencia"
-            className="xl:w-[20rem] w-[10rem] h-auto border border-black rounded mb-4"
+            className="xl:w-[10rem] w-[10rem] h-auto border border-black rounded mb-4"
           />
 
           {gameWon && (
@@ -476,7 +475,7 @@ const UIPuzzleGame = () => {
             </div>
           )}
           {!gameStarted && (
-            <div className="flex items-center justify-around w-[30%] gap-4">
+            <div className="flex items-center justify-around md:w-[20%] w-[90%] gap-4">
               <button
                 onClick={() => {
                   if (progress[selectedLevel]?.[selectedSublevel]?.bestTime) {
