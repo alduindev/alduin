@@ -2,7 +2,6 @@ import React, { useState, useEffect, useRef } from "react";
 import { URL_GEMINI_API } from "../../environments/environment";
 import html2canvas from "html2canvas";
 
-
 const UIMotivationalAgent = () => {
   const [quotes, setQuotes] = useState([]);
   const [currentQuoteIndex, setCurrentQuoteIndex] = useState(0);
@@ -44,7 +43,6 @@ const UIMotivationalAgent = () => {
       const canvas = await html2canvas(screenshotRef.current);
       const image = canvas.toDataURL("image/png");
   
-      // Copiar al portapapeles en lugar de descargar
       try {
         const response = await fetch(image);
         const blob = await response.blob();
@@ -56,7 +54,6 @@ const UIMotivationalAgent = () => {
         console.error("Error al copiar la imagen:", err);
         alert("No se pudo copiar la captura. Intenta descargarla.");
         
-        // Fallback: Descargar imagen si no se puede copiar
         const link = document.createElement("a");
         link.href = image;
         link.download = "frase.png";
