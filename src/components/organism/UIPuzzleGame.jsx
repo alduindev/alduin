@@ -7,8 +7,15 @@ const GAME_TIME = 160;
 const LEVELS = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
 const SUBLEVELS = 9;
 const COLORS = [
-  "bg-red-500", "bg-blue-500", "bg-green-500", "bg-yellow-500",
-  "bg-purple-500", "bg-pink-500", "bg-indigo-500", "bg-gray-500", "bg-teal-500"
+  "bg-red-500",
+  "bg-blue-500",
+  "bg-green-500",
+  "bg-yellow-500",
+  "bg-purple-500",
+  "bg-pink-500",
+  "bg-indigo-500",
+  "bg-gray-500",
+  "bg-teal-500",
 ];
 
 const UIPuzzleGame = () => {
@@ -26,9 +33,11 @@ const UIPuzzleGame = () => {
   const [timer, setTimer] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
-    const savedProgress = JSON.parse(localStorage.getItem("puzzleProgress")) || {};
+    const savedProgress =
+      JSON.parse(localStorage.getItem("puzzleProgress")) || {};
     setProgress(savedProgress);
   }, []);
 
@@ -123,7 +132,11 @@ const UIPuzzleGame = () => {
     let inversions = 0;
     for (let i = 0; i < numbers.length; i++) {
       for (let j = i + 1; j < numbers.length; j++) {
-        if (numbers[i] !== gridSize * gridSize - 1 && numbers[j] !== gridSize * gridSize - 1 && numbers[i] > numbers[j]) {
+        if (
+          numbers[i] !== gridSize * gridSize - 1 &&
+          numbers[j] !== gridSize * gridSize - 1 &&
+          numbers[i] > numbers[j]
+        ) {
           inversions++;
         }
       }
@@ -170,7 +183,10 @@ const UIPuzzleGame = () => {
     if (!neighbors.includes(emptyIndex)) return;
 
     const newTiles = [...pieces];
-    [newTiles[index], newTiles[emptyIndex]] = [newTiles[emptyIndex], newTiles[index]];
+    [newTiles[index], newTiles[emptyIndex]] = [
+      newTiles[emptyIndex],
+      newTiles[index],
+    ];
     setPieces(newTiles);
     setEmptyIndex(index);
     drawPuzzle(image, newTiles, CANVAS_SIZE / gridSize);
@@ -180,8 +196,21 @@ const UIPuzzleGame = () => {
       setGameWon(true);
 
       const updatedProgress = { ...progress };
-      updatedProgress[selectedLevel] = updatedProgress[selectedLevel] || {};
-      updatedProgress[selectedLevel][selectedSublevel] = true;
+
+      if (!updatedProgress[selectedLevel]) {
+        updatedProgress[selectedLevel] = {};
+      }
+
+      if (
+        !updatedProgress[selectedLevel][selectedSublevel] ||
+        elapsedTime < updatedProgress[selectedLevel][selectedSublevel].bestTime
+      ) {
+        updatedProgress[selectedLevel][selectedSublevel] = {
+          completed: true,
+          bestTime: elapsedTime,
+        };
+      }
+
       localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
       setProgress(updatedProgress);
     }
@@ -200,47 +229,137 @@ const UIPuzzleGame = () => {
     return moves;
   };
 
+  const goBack = () => {
+    setGameStarted(false);
+    setSelectedSublevel(null);
+    setGameWon(false);
+    setElapsedTime(0);
+    clearInterval(timer);
+  };
+
   return (
-    <div className={`flex flex-col items-center justify-center lg:min-h-screen h-screen ${isDarkMode ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-900"}`}>
-      <h1 className="lg:text-[4rem] text-[3.5rem] ">MAGICPUZZLE</h1>
+    <div
+      className={`flex flex-col items-center justify-center lg:min-h-screen h-screen ${
+        isDarkMode ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-900"
+      }`}
+    >
+      <h1 className="lg:text-[4rem] text-[3rem] ">MAGICPUZZLE</h1>
+
+      {
+        <button
+          onClick={() => setShowModal(true)}
+          className="absolute top-6 right-6 p-2 bg-gray-200 text-white rounded-full shadow-lg hover:bg-gray-100 transition"
+        >
+          <img
+            src="assets/icon/ico_gear.svg"
+            alt="Configuración"
+            className="w-8 h-8"
+          />
+        </button>
+      }
+
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center">
+            <h2 className="text-2xl font-bold mb-4">Puntuación</h2>
+            <div className="w-full max-w-md mx-auto">
+              <table className="w-full border-collapse border border-gray-300 text-center">
+                <thead>
+                  <tr className="bg-gray-200">
+                    <th className="p-2 border border-gray-300">Nivel</th>
+                    <th className="p-2 border border-gray-300">Subnivel</th>
+                    <th className="p-2 border border-gray-300">Tiempo</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(progress).map(([level, sublevels]) =>
+                    Object.entries(sublevels).map(([sublevel, data]) => (
+                      <tr key={`${level}-${sublevel}`}>
+                        <td className="p-2 border border-gray-300">{level}</td>
+                        <td className="p-2 border border-gray-300">
+                          {sublevel}
+                        </td>
+                        <td className="p-2 border border-gray-300">
+                          {data.bestTime
+                            ? `${data.bestTime}s`
+                            : "No completado"}
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            <button
+              className="mt-4 px-6 py-2 bg-yellow-500 text-white rounded-lg mr-2"
+              onClick={() => {
+                localStorage.removeItem("puzzleProgress");
+                setProgress({});
+              }}
+            >
+              Reiniciar
+            </button>
+
+            <button
+              className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg"
+              onClick={() => setShowModal(false)}
+            >
+              Cerrar
+            </button>
+          </div>
+        </div>
+      )}
+
       {!selectedLevel ? (
         <div className="py-4">
           <div className="grid grid-cols-3 gap-4">
-          {LEVELS.map((level, i) => {
-            const isUnlocked = i === 0 || progress[LEVELS[i - 1]]?.[SUBLEVELS];
-            return (
-              <button
-                key={level}
-                className={`p-6 text-white font-bold text-lg ${isUnlocked ? COLORS[i] : "bg-gray-400 cursor-not-allowed"
+            {LEVELS.map((level, i) => {
+              const isUnlocked =
+                i === 0 || progress[LEVELS[i - 1]]?.[SUBLEVELS];
+              return (
+                <button
+                  key={level}
+                  className={`xl:p-6 p-3 py-6 text-white font-bold text-lg ${
+                    isUnlocked ? COLORS[i] : "bg-gray-400 cursor-not-allowed"
                   } rounded-lg`}
-                onClick={() => isUnlocked && handleSelectLevel(level)}
-                disabled={!isUnlocked}
-              >
-                Nivel {level}
-              </button>
-            );
-          })}
-        </div>
+                  onClick={() => isUnlocked && handleSelectLevel(level)}
+                  disabled={!isUnlocked}
+                >
+                  Nivel {level}
+                </button>
+              );
+            })}
+          </div>
         </div>
       ) : !selectedSublevel ? (
         <div className="py-4">
-        <div className="grid grid-cols-3 gap-4">
-          {Array.from({ length: SUBLEVELS }, (_, i) => {
-            const isUnlocked = i === 0 || progress[selectedLevel]?.[i];
-            return (
-              <button
-                key={i}
-                className={`p-6 px-[2.8rem] text-white font-bold rounded-lg ${isUnlocked ? "bg-green-500" : "bg-gray-400 cursor-not-allowed"
+          <div className="grid grid-cols-3 gap-4">
+            {Array.from({ length: SUBLEVELS }, (_, i) => {
+              const isUnlocked = i === 0 || progress[selectedLevel]?.[i];
+              return (
+                <button
+                  key={i}
+                  className={`p-6 px-[2rem] text-white font-bold rounded-lg ${
+                    isUnlocked
+                      ? "bg-green-600"
+                      : "bg-gray-400 cursor-not-allowed"
                   }`}
-                onClick={() => isUnlocked && setSelectedSublevel(i + 1)}
-                disabled={!isUnlocked}
-              >
-                {selectedLevel}
-                {i + 1}
-              </button>
-            );
-          })}
-        </div>
+                  onClick={() => isUnlocked && setSelectedSublevel(i + 1)}
+                  disabled={!isUnlocked}
+                >
+                  {selectedLevel}
+                  {i + 1}
+                </button>
+              );
+            })}
+          </div>
+          <button
+            className="mt-4 px-6 py-2 bg-orange-600 text-white font-bold rounded-lg w-full"
+            onClick={() => setSelectedLevel(null)}
+          >
+            Volver
+          </button>
         </div>
       ) : (
         <>
@@ -270,19 +389,47 @@ const UIPuzzleGame = () => {
                     setSelectedSublevel(null);
                   }
                 }}
-                className="mt-4 px-6 py-3 font-bold bg-green-500 text-white rounded-lg shadow-lg hover:scale-105 transition"
+                className="mt-4 px-6 py-3 font-bold bg-green-600 text-white rounded-lg shadow-lg hover:scale-105 transition"
               >
-                {selectedSublevel < SUBLEVELS ? "Siguiente Subnivel" : "Volver al Menú"}
+                {selectedSublevel < SUBLEVELS
+                  ? "Siguiente Subnivel"
+                  : "Volver al Menú"}
               </button>
             </div>
           )}
           {!gameStarted && (
-            <button
-              onClick={startGame}
-              className="px-6 py-2 font-bold bg-blue-500 text-white rounded-lg"
-            >
-              Jugar
-            </button>
+            <div className="flex items-center justify-around xl:w-[30%] w-[90%] gap-4">
+              <button
+                onClick={() => {
+                  if (progress[selectedLevel]?.[selectedSublevel]?.bestTime) {
+                    const updatedProgress = { ...progress };
+                    delete updatedProgress[selectedLevel][selectedSublevel];
+                    localStorage.setItem(
+                      "puzzleProgress",
+                      JSON.stringify(updatedProgress)
+                    );
+                    setProgress(updatedProgress);
+                    setGameStarted(false);
+                    setGameWon(false);
+                    setElapsedTime(0);
+                  } else {
+                    startGame();
+                  }
+                }}
+                className="px-6 py-2 font-bold bg-green-600 text-white rounded-lg w-full"
+              >
+                {progress[selectedLevel]?.[selectedSublevel]?.bestTime
+                  ? "Reiniciar"
+                  : "Jugar"}
+              </button>
+
+              <button
+                className="px-4 py-2 font-bold bg-orange-600 text-white rounded-lg w-full"
+                onClick={goBack}
+              >
+                Volver
+              </button>
+            </div>
           )}
           <div className="p-4 scale-90">
             <canvas
@@ -301,6 +448,7 @@ const UIPuzzleGame = () => {
           </div>
         </>
       )}
+
       <button
         className="px-4 py-2 bg-gray-600 text-white rounded-lg"
         onClick={toggleDarkMode}
@@ -309,8 +457,6 @@ const UIPuzzleGame = () => {
       </button>
       <p className="text-gray-300 mt-4">V.1.0.1 - Creado con amor</p>
     </div>
-
-
   );
 };
 
