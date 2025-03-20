@@ -455,7 +455,7 @@ const UIPuzzleGame = () => {
       >
         {isDarkMode ? "Modo Día ☀️" : "Modo Noche 🌙"}
       </button>
-      <p className="text-gray-300 mt-4">V.1.0.1 - Creado con amor</p>
+      <p className="text-gray-300 mt-4">V.1.0.2 - Creado con amor</p>
     </div>
   );
 };
