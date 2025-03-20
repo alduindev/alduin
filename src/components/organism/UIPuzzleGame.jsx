@@ -41,6 +41,20 @@ const UIPuzzleGame = () => {
     setProgress(savedProgress);
   }, []);
 
+  useEffect(() => {
+    const currentHour = new Date().getHours();
+    const currentMinute = new Date().getMinutes();
+  
+    if (
+      currentHour >= 18 && currentMinute >= 30 || currentHour < 5
+    ) {
+      setIsDarkMode(true);
+    } else {
+      setIsDarkMode(false);
+    }
+  }, []);
+  
+
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
   };
