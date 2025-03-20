@@ -284,7 +284,7 @@ const UIPuzzleGame = () => {
               Jugar
             </button>
           )}
-          <div className="p-4">
+          <div className="p-4 scale-90">
             <canvas
               ref={canvasRef}
               className="border border-black bg-gray-700 w-full min-w-[300px] aspect-square"
