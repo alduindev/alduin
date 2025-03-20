@@ -2,32 +2,46 @@ import React, { useRef, useEffect, useState } from "react";
 
 const PLACE_DOG_URL = "https://placedog.net/450/450?random";
 const MOVIE_IMAGE_URL = "https://via.assets.so/movie.png?id=";
-const GRID_SIZE = 3;
-const EMPTY_TILE = GRID_SIZE * GRID_SIZE - 1;
 const CANVAS_SIZE = 450;
 const GAME_TIME = 160;
+const LEVELS = ["A", "B", "C", "D", "E", "F", "G", "H", "I"];
+const SUBLEVELS = 9;
+const COLORS = [
+  "bg-red-500", "bg-blue-500", "bg-green-500", "bg-yellow-500",
+  "bg-purple-500", "bg-pink-500", "bg-indigo-500", "bg-gray-500", "bg-teal-500"
+];
 
 const UIPuzzleGame = () => {
   const canvasRef = useRef(null);
+  const [selectedLevel, setSelectedLevel] = useState(null);
+  const [selectedSublevel, setSelectedSublevel] = useState(null);
+  const [gridSize, setGridSize] = useState(null);
   const [pieces, setPieces] = useState([]);
-  const [emptyIndex, setEmptyIndex] = useState(EMPTY_TILE);
+  const [emptyIndex, setEmptyIndex] = useState(gridSize * gridSize - 1);
   const [gameWon, setGameWon] = useState(false);
   const [image, setImage] = useState(null);
   const [imageURL, setImageURL] = useState(null);
-  const [gameTime, setGameTime] = useState(GAME_TIME);
   const [gameStarted, setGameStarted] = useState(false);
-  const [lost, setLost] = useState(false);
-  const [imageLoaded, setImageLoaded] = useState(false);
+  const [progress, setProgress] = useState({});
+  const [timer, setTimer] = useState(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
 
   useEffect(() => {
-    fetchRandomImage();
+    const savedProgress = JSON.parse(localStorage.getItem("puzzleProgress")) || {};
+    setProgress(savedProgress);
   }, []);
+
+  useEffect(() => {
+    if (selectedSublevel) {
+      fetchRandomImage();
+    }
+  }, [selectedSublevel]);
 
   const fetchRandomImage = () => {
     const isDog = Math.random() < 0.5;
     const randomMovieID = Math.floor(Math.random() * 100) + 1;
     const imgSrc = isDog
-      ? `${PLACE_DOG_URL}&nocache=${Date.now()}` // Imagen de perro
+      ? `${PLACE_DOG_URL}&nocache=${Date.now()}`
       : `${MOVIE_IMAGE_URL}${randomMovieID}&q=95&w=450&h=450&fit=fill`;
 
     const img = new Image();
@@ -42,44 +56,52 @@ const UIPuzzleGame = () => {
   const drawOriginalImage = (img) => {
     const canvas = canvasRef.current;
     const ctx = canvas.getContext("2d");
-
     canvas.width = CANVAS_SIZE;
     canvas.height = CANVAS_SIZE;
-
     ctx.drawImage(img, 0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    setImageLoaded(true);
+  };
+
+  const handleSelectLevel = (level) => {
+    setSelectedLevel(level);
+
+    if (["A", "B", "C"].includes(level)) {
+      setGridSize(3);
+    } else if (["D", "E", "F"].includes(level)) {
+      setGridSize(4);
+    } else if (["G", "H", "I"].includes(level)) {
+      setGridSize(5);
+    }
   };
 
   const startGame = () => {
     setGameStarted(true);
+    setElapsedTime(0);
     initializePuzzle(image);
-    startGameTimer();
+    startTimer();
   };
 
-  const startGameTimer = () => {
-    const gameCountdown = setInterval(() => {
-      setGameTime((prev) => {
-        if (prev <= 1) {
-          clearInterval(gameCountdown);
-          setLost(true);
-          setGameStarted(false);
-          return 0;
-        }
-        return prev - 1;
-      });
+  const startTimer = () => {
+    const startTime = Date.now();
+    const interval = setInterval(() => {
+      setElapsedTime(Math.floor((Date.now() - startTime) / 1000));
     }, 1000);
+    setTimer(interval);
+  };
+
+  const stopTimer = () => {
+    clearInterval(timer);
   };
 
   const initializePuzzle = (img) => {
-    const pieceSize = CANVAS_SIZE / GRID_SIZE;
-    let tiles = Array.from({ length: GRID_SIZE * GRID_SIZE }, (_, i) => i);
+    const pieceSize = CANVAS_SIZE / gridSize;
+    let tiles = Array.from({ length: gridSize * gridSize }, (_, i) => i);
 
     do {
       tiles = shuffleArray([...tiles]);
     } while (!isSolvable(tiles));
 
     setPieces(tiles);
-    setEmptyIndex(tiles.indexOf(EMPTY_TILE));
+    setEmptyIndex(tiles.indexOf(gridSize * gridSize - 1));
     drawPuzzle(img, tiles, pieceSize);
   };
 
@@ -95,11 +117,7 @@ const UIPuzzleGame = () => {
     let inversions = 0;
     for (let i = 0; i < numbers.length; i++) {
       for (let j = i + 1; j < numbers.length; j++) {
-        if (
-          numbers[i] !== EMPTY_TILE &&
-          numbers[j] !== EMPTY_TILE &&
-          numbers[i] > numbers[j]
-        ) {
+        if (numbers[i] !== gridSize * gridSize - 1 && numbers[j] !== gridSize * gridSize - 1 && numbers[i] > numbers[j]) {
           inversions++;
         }
       }
@@ -115,20 +133,20 @@ const UIPuzzleGame = () => {
     canvas.height = CANVAS_SIZE;
 
     tiles.forEach((tile, index) => {
-      if (tile === EMPTY_TILE) return;
+      if (tile === gridSize * gridSize - 1) return;
 
-      const sx = (tile % GRID_SIZE) * (img.width / GRID_SIZE);
-      const sy = Math.floor(tile / GRID_SIZE) * (img.height / GRID_SIZE);
+      const sx = (tile % gridSize) * (img.width / gridSize);
+      const sy = Math.floor(tile / gridSize) * (img.height / gridSize);
 
-      const dx = (index % GRID_SIZE) * pieceSize;
-      const dy = Math.floor(index / GRID_SIZE) * pieceSize;
+      const dx = (index % gridSize) * pieceSize;
+      const dy = Math.floor(index / gridSize) * pieceSize;
 
       ctx.drawImage(
         img,
         sx,
         sy,
-        img.width / GRID_SIZE,
-        img.height / GRID_SIZE,
+        img.width / gridSize,
+        img.height / gridSize,
         dx,
         dy,
         pieceSize,
@@ -140,130 +158,142 @@ const UIPuzzleGame = () => {
   };
 
   const moveTile = (index) => {
-    if (!gameStarted || lost) return;
+    if (!gameStarted) return;
 
     const neighbors = getMovableTiles(index);
     if (!neighbors.includes(emptyIndex)) return;
 
     const newTiles = [...pieces];
-    [newTiles[index], newTiles[emptyIndex]] = [
-      newTiles[emptyIndex],
-      newTiles[index],
-    ];
+    [newTiles[index], newTiles[emptyIndex]] = [newTiles[emptyIndex], newTiles[index]];
     setPieces(newTiles);
     setEmptyIndex(index);
+    drawPuzzle(image, newTiles, CANVAS_SIZE / gridSize);
 
     if (newTiles.every((tile, i) => tile === i)) {
+      stopTimer();
       setGameWon(true);
-    } else {
-      redrawPuzzle(newTiles);
+
+      const updatedProgress = { ...progress };
+      updatedProgress[selectedLevel] = updatedProgress[selectedLevel] || {};
+      updatedProgress[selectedLevel][selectedSublevel] = true;
+      localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
+      setProgress(updatedProgress);
     }
   };
 
   const getMovableTiles = (index) => {
-    const row = Math.floor(index / GRID_SIZE);
-    const col = index % GRID_SIZE;
+    const row = Math.floor(index / gridSize);
+    const col = index % gridSize;
     const moves = [];
 
-    if (row > 0) moves.push(index - GRID_SIZE);
-    if (row < GRID_SIZE - 1) moves.push(index + GRID_SIZE);
+    if (row > 0) moves.push(index - gridSize);
+    if (row < gridSize - 1) moves.push(index + gridSize);
     if (col > 0) moves.push(index - 1);
-    if (col < GRID_SIZE - 1) moves.push(index + 1);
+    if (col < gridSize - 1) moves.push(index + 1);
 
     return moves;
   };
 
-  const redrawPuzzle = (tiles) => {
-    if (!image) return;
-    drawPuzzle(image, tiles, CANVAS_SIZE / GRID_SIZE);
-  };
-
-  const resetGame = () => {
-    setGameStarted(false);
-    setGameWon(false);
-    setLost(false);
-    setGameTime(GAME_TIME);
-    setPieces([]);
-    setEmptyIndex(EMPTY_TILE);
-    setImage(null);
-    setImageURL(null);
-    setImageLoaded(false);
-    fetchRandomImage();
-  };
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-      {!gameStarted && imageLoaded && !gameWon && !lost && (
-        <button
-          onClick={startGame}
-          className="mb-4 px-6 py-2 font-bold text-gray-800 transition-all
-               rounded-[15%] bg-gradient-to-br from-white to-gray-300
-               shadow-[1px_1px_15px_#D9DADE,-1px_-1px_8px_#FFFFFF]
-               hover:bg-[#EEF0F4] hover:shadow-[inset_9.91px_9.91px_15px_#D9DADE,inset_-9.91px_-9.91px_15px_#FFFFFF]
-               active:bg-[#EEF0F4] active:shadow-[inset_9.91px_9.91px_15px_#D9DADE,inset_-9.91px_-9.91px_15px_#FFFFFF]"
-        >
-          Jugar
-        </button>
-      )}
-
-      <div className="mb-4">
-        <h2 className="text-lg text-center font-semibold">Referencia</h2>
-        <img
-          src={imageURL}
-          alt=""
-          className="w-32 h-auto object-cover border border-black rounded"
-        />
-      </div>
-
-      {gameStarted && !gameWon && !lost && (
-        <div className="text-blue-600 font-bold text-xl mb-4">
-          ⏳ Tiempo restante: {gameTime}s
+    <div className="flex flex-col items-center justify-center min-h-screen">
+      <h1 className="lg:text-[4rem] text-[3rem] ">MAGICPUZZLE</h1>
+      {!selectedLevel ? (
+        <div className="grid grid-cols-3 gap-4">
+          {LEVELS.map((level, i) => {
+            const isUnlocked = i === 0 || progress[LEVELS[i - 1]]?.[SUBLEVELS];
+            return (
+              <button
+                key={level}
+                className={`p-6 text-white font-bold text-lg ${isUnlocked ? COLORS[i] : "bg-gray-400 cursor-not-allowed"
+                  } rounded-lg`}
+                onClick={() => isUnlocked && handleSelectLevel(level)}
+                disabled={!isUnlocked}
+              >
+                Nivel {level}
+              </button>
+            );
+          })}
         </div>
+      ) : !selectedSublevel ? (
+        <div className="grid grid-cols-3 gap-4">
+          {Array.from({ length: SUBLEVELS }, (_, i) => {
+            const isUnlocked = i === 0 || progress[selectedLevel]?.[i];
+            return (
+              <button
+                key={i}
+                className={`p-6 px-[2.8rem] text-white font-bold rounded-lg ${isUnlocked ? "bg-green-500" : "bg-gray-400 cursor-not-allowed"
+                  }`}
+                onClick={() => isUnlocked && setSelectedSublevel(i + 1)}
+                disabled={!isUnlocked}
+              >
+                {selectedLevel}
+                {i + 1}
+              </button>
+            );
+          })}
+        </div>
+      ) : (
+        <>
+          <h2 className="text-xl font-bold">
+            {selectedLevel} {selectedSublevel}
+          </h2>
+          <p className="text-[2rem] font-semibold">⏱{elapsedTime}s</p>
+          <img
+            src={imageURL}
+            alt="Referencia"
+            className="lg:w-[20rem] w-[10rem] h-auto border border-black rounded mb-4"
+          />
+
+          {gameWon && (
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#ffffff3f] bg-opacity-90 text-center p-6 rounded-lg shadow-lg">
+              <h2 className="text-3xl font-bold text-green-600">
+                🎉 ¡FELICIDADES! 🎉
+              </h2>
+              <button
+                onClick={() => {
+                  if (selectedSublevel < SUBLEVELS) {
+                    setSelectedSublevel(selectedSublevel + 1);
+                    setGameWon(false);
+                    setGameStarted(false);
+                  } else {
+                    setSelectedLevel(null);
+                    setSelectedSublevel(null);
+                  }
+                }}
+                className="mt-4 px-6 py-3 font-bold bg-green-500 text-white rounded-lg shadow-lg hover:scale-105 transition"
+              >
+                {selectedSublevel < SUBLEVELS ? "Siguiente Subnivel" : "Volver al Menú"}
+              </button>
+            </div>
+          )}
+          {!gameStarted && (
+            <button
+              onClick={startGame}
+              className="my-4 px-6 py-2 font-bold bg-blue-500 text-white rounded-lg"
+            >
+              Jugar
+            </button>
+          )}
+          <div className="p-4">
+          <canvas
+            ref={canvasRef}
+            className="border border-black bg-gray-700 w-full min-w-[300px] aspect-square"
+            onClick={(e) => {
+              const rect = canvasRef.current.getBoundingClientRect();
+              const x = e.clientX - rect.left;
+              const y = e.clientY - rect.top;
+              const pieceSize = rect.width / gridSize;
+              const col = Math.floor(x / pieceSize);
+              const row = Math.floor(y / pieceSize);
+              moveTile(row * gridSize + col);
+            }}
+          />
+          </div>
+        </>
       )}
+    </div>
 
-<div className="relative">
-  {gameWon ? (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50">
-      <div className="text-green-600 font-bold text-xl mb-4">🎉 ¡Ganaste! 🎉</div>
-      <button
-        onClick={resetGame}
-        className="px-6 py-2 font-bold text-white transition-all
-          rounded-lg bg-gradient-to-br from-green-500 to-green-700
-          shadow-lg hover:scale-105 hover:from-green-600 hover:to-green-800"
-      >
-        Reiniciar
-      </button>
-    </div>
-  ) : lost ? (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bg-black bg-opacity-50">
-      <div className="text-white font-bold text-xl mb-4">⏳ ¡Perdiste!</div>
-      <button
-        onClick={resetGame}
-        className="px-6 py-2 font-bold text-white transition-all
-          rounded-lg bg-gradient-to-br from-red-500 to-red-700
-          shadow-lg hover:scale-105 hover:from-red-600 hover:to-red-800"
-      >
-        Reiniciar
-      </button>
-    </div>
-  ) : null}
 
-  <canvas
-    ref={canvasRef}
-    className="border border-black bg-gray-700 w-full max-w-[450px] aspect-square"
-    onClick={(e) => {
-      if (!gameStarted) return;
-      const rect = canvasRef.current.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      const pieceSize = rect.width / GRID_SIZE;
-      const col = Math.floor(x / pieceSize);
-      const row = Math.floor(y / pieceSize);
-      moveTile(row * GRID_SIZE + col);
-    }}
-  />
-</div>
-    </div>
   );
 };
 
