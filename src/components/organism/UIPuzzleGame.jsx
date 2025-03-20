@@ -248,10 +248,12 @@ const UIPuzzleGame = () => {
 
   return (
     <div
-      className={`flex flex-col items-center justify-center lg:min-h-screen h-screen ${
-        isDarkMode ? "bg-gray-800 text-white" : "bg-gray-100 text-gray-900"
-      }`}
-    >
+  className={`flex flex-col items-center justify-center lg:min-h-screen h-screen transition-all duration-700 ${
+    isDarkMode
+      ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
+      : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
+  }`}
+>
       <h1 className="lg:text-[4rem] text-[3rem] ">MAGICPUZZLE</h1>
 
       {
