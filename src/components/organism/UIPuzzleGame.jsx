@@ -216,6 +216,15 @@ const UIPuzzleGame = () => {
     }
   };
 
+  const [expandedLevels, setExpandedLevels] = useState({});
+
+  const toggleLevel = (level) => {
+    setExpandedLevels((prev) => ({
+      ...prev,
+      [level]: !prev[level],
+    }));
+  };
+
   const getMovableTiles = (index) => {
     const row = Math.floor(index / gridSize);
     const col = index % gridSize;
@@ -260,9 +269,9 @@ const UIPuzzleGame = () => {
 
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center text-green-900">
+          <div className="bg-white p-6 rounded-lg shadow-lg text-center text-green-900 xl:w-auto w-[90%] ">
             <h2 className="text-2xl font-bold mb-4">Puntuación</h2>
-            <div className="w-full max-w-md mx-auto">
+            <div className="w-full overflow-x-auto">
               <table className="w-full border-collapse border border-gray-300 text-center">
                 <thead>
                   <tr className="bg-gray-200">
@@ -272,21 +281,35 @@ const UIPuzzleGame = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {Object.entries(progress).map(([level, sublevels]) =>
-                    Object.entries(sublevels).map(([sublevel, data]) => (
-                      <tr key={`${level}-${sublevel}`}>
-                        <td className="p-2 border border-gray-300">{level}</td>
-                        <td className="p-2 border border-gray-300">
-                          {sublevel}
-                        </td>
-                        <td className="p-2 border border-gray-300">
-                          {data.bestTime
-                            ? `${data.bestTime}s`
-                            : "No completado"}
+                  {Object.entries(progress).map(([level, sublevels]) => (
+                    <React.Fragment key={level}>
+                      <tr
+                        onClick={() => toggleLevel(level)}
+                        className="cursor-pointer bg-gray-100 hover:bg-gray-300 transition-colors"
+                      >
+                        <td
+                          className="p-2 border border-gray-300 font-bold"
+                          colSpan={3}
+                        >
+                          {expandedLevels[level] ? "▼" : "▶"} Nivel {level}
                         </td>
                       </tr>
-                    ))
-                  )}
+                      {expandedLevels[level] &&
+                        Object.entries(sublevels).map(([sublevel, data]) => (
+                          <tr key={`${level}-${sublevel}`} className="bg-white">
+                            <td className="p-2 border border-gray-300">{level}</td>
+                            <td className="p-2 border border-gray-300">
+                              {sublevel}
+                            </td>
+                            <td className="p-2 border border-gray-300">
+                              {data.bestTime
+                                ? `${data.bestTime}s`
+                                : "No completado"}
+                            </td>
+                          </tr>
+                        ))}
+                    </React.Fragment>
+                  ))}
                 </tbody>
               </table>
             </div>
