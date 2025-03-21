@@ -107,7 +107,7 @@ const UIPuzzleGame = () => {
       return;
     }
 
-    const baseImage = IMAGE_SOURCES[selectedLevel]?.[0]; // Tomamos la única URL base del nivel
+    const baseImage = IMAGE_SOURCES[selectedLevel]?.[0];
     if (!baseImage) {
       console.error(
         `Error: No hay imagen definida para el nivel ${selectedLevel}`
@@ -116,7 +116,6 @@ const UIPuzzleGame = () => {
       return;
     }
 
-    // Generar URL aleatoria para cada subnivel
     const randomUrl = `${baseImage.url}&random=${selectedSublevel}`;
 
     const img = new Image();

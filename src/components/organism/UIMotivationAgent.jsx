@@ -15,7 +15,7 @@ const UIMotivationalAgent = () => {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) return "Buen día ☀";
-    if (hour >= 12 && hour < 18.5) return "Buenas tardes 🌤️";
+    if (hour >= 12 && hour < 18) return "Buenas tardes 🌤️";
     return "Buenas noches 🌙";
   };
 
@@ -25,7 +25,7 @@ const UIMotivationalAgent = () => {
     else if (hour >= 5 && hour < 7) setBackgroundClass("bg-blue-900 text-yellow-100");
     else if (hour >= 7 && hour < 12) setBackgroundClass("bg-yellow-300 text-gray-900");
     else if (hour >= 12 && hour < 17.5) setBackgroundClass("bg-orange-400 text-gray-900");
-    else if (hour >= 17.5 && hour < 18.5) setBackgroundClass("bg-orange-700 text-gray-100");
+    else if (hour >= 17.5 && hour < 18) setBackgroundClass("bg-orange-700 text-gray-100");
     else setBackgroundClass("bg-gray-800 text-white");
   };
 
@@ -68,43 +68,47 @@ const UIMotivationalAgent = () => {
       const response = await fetch(
         `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
         {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            contents: [
-              {
-                parts: [
-                  {
-                    text: `Dame una lista de 5 frases variadas, que incluyan:
-                      - Frases de libros famosos.
-                      - Frases inspiradoras de películas.
-                      - Citas de científicos o filósofos.
-                      - Frases de personajes históricos.
-                      - Reflexiones originales sobre la vida y la superación.
-                      - Pasajes de la Biblia (pueden ser motivacionales, reflexivos o de cualquier otro tipo relevante).
-  
-                      No repitas frases ya mostradas: ${Array.from(shownQuotes).join(", ")}
-  
-                      La respuesta debe estar en formato JSON exacto así:
-                      \`\`\`json
-                      {
-                        "frases": [
-                          "Frase 1 - Autor/Fuente",
-                          "Frase 2 - Autor/Fuente",
-                          "Frase 3 - Autor/Fuente",
-                          "Frase 4 - Autor/Fuente",
-                          "Frase 5 - Autor/Fuente"
-                        ]
-                      }
-                      \`\`\`
-                    `,
-                  },
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                contents: [
+                    {
+                        parts: [
+                            {
+                                text: `Dame una lista de 5 frases variadas, que incluyan:
+                                - Frases de libros famosos.
+                                - Frases inspiradoras de películas.
+                                - Citas de científicos o filósofos.
+                                - Frases de personajes históricos.
+                                - Reflexiones originales sobre la vida y la superación.
+                                - Pasajes de la Biblia (pueden ser motivacionales, reflexivos o de cualquier otro tipo relevante).
+                                - Frases icónicas de animes.
+                                - Reflexiones filosóficas profundas.
+                                - Conceptos teológicos importantes expresados en frases.
+                                - Citas de expertos en tecnología de la información.
+    
+                                No repitas frases ya mostradas: ${Array.from(shownQuotes).join(", ")}
+    
+                                La respuesta debe estar en formato JSON exacto así:
+                                \`\`\`json
+                                {
+                                    "frases": [
+                                        "Frase 1 - Autor/Fuente",
+                                        "Frase 2 - Autor/Fuente",
+                                        "Frase 3 - Autor/Fuente",
+                                        "Frase 4 - Autor/Fuente",
+                                        "Frase 5 - Autor/Fuente"
+                                    ]
+                                }
+                                \`\`\`
+                                `,
+                            },
+                        ],
+                    },
                 ],
-              },
-            ],
-          }),
+            }),
         }
-      );
+    );    
 
       const data = await response.json();
       const rawText = data?.candidates?.[0]?.content?.parts?.[0]?.text || "{}";
