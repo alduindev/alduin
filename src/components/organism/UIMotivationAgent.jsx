@@ -22,13 +22,18 @@ const UIMotivationalAgent = () => {
 
   const updateBackground = () => {
     const hour = new Date().getHours();
-    if (hour >= 0 && hour < 5) setBackgroundClass("bg-gray-900 text-white");
-    else if (hour >= 5 && hour < 7) setBackgroundClass("bg-blue-900 text-yellow-100");
-    else if (hour >= 7 && hour < 12) setBackgroundClass("bg-yellow-300 text-gray-900");
-    else if (hour >= 12 && hour < 17.5) setBackgroundClass("bg-orange-400 text-gray-900");
-    else if (hour >= 17.5 && hour < 18) setBackgroundClass("bg-orange-700 text-gray-100");
-    else setBackgroundClass("bg-gray-800 text-white");
+    let newBackgroundClass = "";
+  
+    if (hour >= 0 && hour < 5) newBackgroundClass = "bg-gray-900 text-white";
+    else if (hour >= 5 && hour < 7) newBackgroundClass = "bg-blue-900 text-yellow-100";
+    else if (hour >= 7 && hour < 12) newBackgroundClass = "bg-yellow-300 text-gray-900";
+    else if (hour >= 12 && hour < 17.5) newBackgroundClass = "bg-orange-400 text-gray-900";
+    else if (hour >= 17.5 && hour < 18) newBackgroundClass = "bg-orange-700 text-gray-100";
+    else newBackgroundClass = "bg-gray-800 text-white";
+  
+    setBackgroundClass((prev) => (prev !== newBackgroundClass ? newBackgroundClass : prev));
   };
+  
 
   const extractJSON = (text) => {
     try {
@@ -79,6 +84,13 @@ const UIMotivationalAgent = () => {
   useEffect(() => {
     setCurrentDate(formatDate());
   }, []);
+
+  useEffect(() => {
+    updateBackground();
+    const interval = setInterval(updateBackground, 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
+  
 
   const fetchQuotes = async () => {
     try {

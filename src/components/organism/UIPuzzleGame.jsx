@@ -69,14 +69,14 @@ const UIPuzzleGame = () => {
 
   useEffect(() => {
     const currentHour = new Date().getHours();
-    const currentMinute = new Date().getMinutes();
-
-    if ((currentHour >= 18 && currentMinute >= 30) || currentHour < 5) {
+  
+    if (currentHour >= 18 || currentHour < 5) {
       setIsDarkMode(true);
     } else {
       setIsDarkMode(false);
     }
   }, []);
+  
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -429,33 +429,38 @@ const UIPuzzleGame = () => {
         </div>
       ) : !selectedSublevel ? (
         <div className="py-4">
-          <div className="grid grid-cols-3 gap-4">
-            {Array.from({ length: SUBLEVELS }, (_, i) => {
-              const isUnlocked = i === 0 || progress[selectedLevel]?.[i];
-              return (
-                <button
-                  key={i}
-                  className={`p-6 px-[2rem] text-white font-bold rounded-lg ${
-                    isUnlocked
-                      ? "bg-green-600"
-                      : "bg-gray-400 cursor-not-allowed"
-                  }`}
-                  onClick={() => isUnlocked && setSelectedSublevel(i + 1)}
-                  disabled={!isUnlocked}
-                >
-                  {selectedLevel}
-                  {i + 1}
-                </button>
-              );
-            })}
-          </div>
-          <button
-            className="mt-4 px-6 py-2 bg-orange-600 text-white font-bold rounded-lg w-full"
-            onClick={() => setSelectedLevel(null)}
-          >
-            Volver
-          </button>
-        </div>
+  <div className="grid grid-cols-3 gap-4">
+    {Array.from({ length: SUBLEVELS }, (_, i) => {
+      const isUnlocked = i === 0 || progress[selectedLevel]?.[i]; // Si está desbloqueado
+      const hasTime = progress[selectedLevel]?.[i]?.bestTime; // Si tiene un tiempo registrado
+
+      return (
+        <button
+          key={i}
+          className={`p-6 px-[2rem] text-white font-bold rounded-lg transition ${
+            !isUnlocked
+              ? "bg-gray-400 cursor-not-allowed" // Bloqueado
+              : hasTime
+              ? "bg-green-600 hover:bg-green-500" // Completado con tiempo
+              : "bg-red-600 hover:bg-red-500"
+          }`}
+          onClick={() => isUnlocked && setSelectedSublevel(i + 1)}
+          disabled={!isUnlocked}
+        >
+          {selectedLevel}
+          {i + 1}
+        </button>
+      );
+    })}
+  </div>
+  <button
+    className="mt-4 px-6 py-2 bg-orange-600 text-white font-bold rounded-lg w-full"
+    onClick={() => setSelectedLevel(null)}
+  >
+    Volver
+  </button>
+</div>
+
       ) : (
         <>
           <h2 className="text-xl font-bold">
