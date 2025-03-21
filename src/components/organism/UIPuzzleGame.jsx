@@ -481,7 +481,7 @@ const UIPuzzleGame = () => {
           )}
 
           {gameWon && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#ffffff3f] bg-opacity-90 text-center p-6 rounded-lg shadow-lg z-10">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#000000f2] bg-opacity-90 text-center p-6 rounded-lg shadow-lg z-10">
               <h2 className="text-3xl font-bold text-green-600">
                 🎉 ¡FELICIDADES! 🎉
               </h2>
@@ -499,7 +499,7 @@ const UIPuzzleGame = () => {
                 className="mt-4 px-6 py-3 font-bold bg-green-600 text-white rounded-lg shadow-lg hover:scale-105 transition"
               >
                 {selectedSublevel < SUBLEVELS
-                  ? "Siguiente Subnivel"
+                  ? "Siguiente"
                   : "Volver al Menú"}
               </button>
             </div>
@@ -521,11 +521,13 @@ const UIPuzzleGame = () => {
                 onClick={() => {
                   if (progress[selectedLevel]?.[selectedSublevel]?.bestTime) {
                     const updatedProgress = { ...progress };
-                    delete updatedProgress[selectedLevel][selectedSublevel];
-                    localStorage.setItem(
-                      "puzzleProgress",
-                      JSON.stringify(updatedProgress)
-                    );
+                  
+                    updatedProgress[selectedLevel][selectedSublevel] = {
+                      completed: false,
+                      bestTime: null,
+                    };
+                  
+                    localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
                     setProgress(updatedProgress);
                     setGameStarted(false);
                     setGameWon(false);
@@ -533,6 +535,7 @@ const UIPuzzleGame = () => {
                   } else {
                     startGame();
                   }
+                  
                 }}
                 className="px-6 py-2 font-bold bg-green-600 text-white rounded-lg w-full"
               >
