@@ -69,14 +69,14 @@ const UIPuzzleGame = () => {
 
   useEffect(() => {
     const currentHour = new Date().getHours();
-  
+
     if (currentHour >= 18 || currentHour < 5) {
       setIsDarkMode(true);
     } else {
       setIsDarkMode(false);
     }
   }, []);
-  
+
 
   const toggleDarkMode = () => {
     setIsDarkMode(!isDarkMode);
@@ -313,11 +313,10 @@ const UIPuzzleGame = () => {
 
   return (
     <div
-      className={`flex flex-col items-center justify-center min-h-screen transition-all duration-700 ${
-        isDarkMode
-          ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
-          : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
-      }`}
+      className={`flex flex-col items-center justify-center min-h-screen transition-all duration-700 ${isDarkMode
+        ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
+        : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
+        }`}
       style={{ overflow: "hidden" }}
     >
       {Object.keys(progress).length > 0 && (
@@ -415,9 +414,8 @@ const UIPuzzleGame = () => {
               return (
                 <button
                   key={level}
-                  className={`xl:p-6 p-3 py-6 text-white font-bold text-lg ${
-                    isUnlocked ? COLORS[i] : "bg-gray-400 cursor-not-allowed"
-                  } rounded-lg`}
+                  className={`xl:p-6 p-3 py-6 text-white font-bold text-lg ${isUnlocked ? COLORS[i] : "bg-gray-400 cursor-not-allowed"
+                    } rounded-lg`}
                   onClick={() => isUnlocked && handleSelectLevel(level)}
                   disabled={!isUnlocked}
                 >
@@ -429,37 +427,38 @@ const UIPuzzleGame = () => {
         </div>
       ) : !selectedSublevel ? (
         <div className="py-4">
-  <div className="grid grid-cols-3 gap-4">
-    {Array.from({ length: SUBLEVELS }, (_, i) => {
-      const isUnlocked = i === 0 || progress[selectedLevel]?.[i]; // Si está desbloqueado
-      const hasTime = progress[selectedLevel]?.[i]?.bestTime; // Si tiene un tiempo registrado
+          <div className="grid grid-cols-3 gap-4">
+            {Array.from({ length: SUBLEVELS }, (_, i) => {
+              const isUnlocked = i === 0 || progress[selectedLevel]?.[i + 1];
+              const hasTime = progress[selectedLevel]?.[i + 1]?.bestTime;
 
-      return (
-        <button
-          key={i}
-          className={`p-6 px-[2rem] text-white font-bold rounded-lg transition ${
-            !isUnlocked
-              ? "bg-gray-400 cursor-not-allowed" // Bloqueado
-              : hasTime
-              ? "bg-green-600 hover:bg-green-500" // Completado con tiempo
-              : "bg-red-600 hover:bg-red-500"
-          }`}
-          onClick={() => isUnlocked && setSelectedSublevel(i + 1)}
-          disabled={!isUnlocked}
-        >
-          {selectedLevel}
-          {i + 1}
-        </button>
-      );
-    })}
-  </div>
-  <button
-    className="mt-4 px-6 py-2 bg-orange-600 text-white font-bold rounded-lg w-full"
-    onClick={() => setSelectedLevel(null)}
-  >
-    Volver
-  </button>
-</div>
+              return (
+                <button
+                  key={i}
+                  className={`p-6 px-[2rem] text-white font-bold rounded-lg transition ${!isUnlocked
+                    ? "bg-gray-400 cursor-not-allowed"
+                    : hasTime
+                      ? "bg-green-600 hover:bg-green-500"
+                      : "bg-red-600 hover:bg-red-500"
+                    }`}
+                  onClick={() => isUnlocked && setSelectedSublevel(i + 1)}
+                  disabled={!isUnlocked}
+                >
+                  {selectedLevel}
+                  {i + 1}
+                </button>
+              );
+            })}
+
+
+          </div>
+          <button
+            className="mt-4 px-6 py-2 bg-orange-600 text-white font-bold rounded-lg w-full"
+            onClick={() => setSelectedLevel(null)}
+          >
+            Volver
+          </button>
+        </div>
 
       ) : (
         <>
@@ -525,12 +524,12 @@ const UIPuzzleGame = () => {
                 onClick={() => {
                   if (progress[selectedLevel]?.[selectedSublevel]?.bestTime) {
                     const updatedProgress = { ...progress };
-                  
+
                     updatedProgress[selectedLevel][selectedSublevel] = {
                       completed: false,
                       bestTime: null,
                     };
-                  
+
                     localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
                     setProgress(updatedProgress);
                     setGameStarted(false);
@@ -539,7 +538,7 @@ const UIPuzzleGame = () => {
                   } else {
                     startGame();
                   }
-                  
+
                 }}
                 className="px-6 py-2 font-bold bg-green-600 text-white rounded-lg w-full"
               >
@@ -584,15 +583,13 @@ const UIPuzzleGame = () => {
       )}
 
       <div
-        className={`relative w-14 h-7 flex items-center bg-gray-400 rounded-full p-1 cursor-pointer transition-all duration-500 ${
-          isDarkMode ? "bg-gray-800" : "bg-gray-300"
-        }`}
+        className={`relative w-14 h-7 flex items-center bg-gray-400 rounded-full p-1 cursor-pointer transition-all duration-500 ${isDarkMode ? "bg-gray-800" : "bg-gray-300"
+          }`}
         onClick={toggleDarkMode}
       >
         <div
-          className={`w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-md transform transition-all duration-500 ${
-            isDarkMode ? "translate-x-7" : "translate-x-0"
-          }`}
+          className={`w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-md transform transition-all duration-500 ${isDarkMode ? "translate-x-7" : "translate-x-0"
+            }`}
         >
           {isDarkMode ? "🌙" : "☀️"}
         </div>
