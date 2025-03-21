@@ -8,6 +8,7 @@ const UIMotivationalAgent = () => {
   const [shownQuotes, setShownQuotes] = useState(new Set());
   const [backgroundClass, setBackgroundClass] = useState("");
   const [currentTime, setCurrentTime] = useState("");
+  const [currentDate, setCurrentDate] = useState("");
   const screenshotRef = useRef(null);
 
   const API_KEY = URL_GEMINI_API;
@@ -15,7 +16,7 @@ const UIMotivationalAgent = () => {
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour >= 5 && hour < 12) return "Buen día ☀";
-    if (hour >= 12 && hour < 18) return "Buenas tardes 🌤️";
+    if (hour >= 12 && hour < 18) return "🌤️Buenas tardes";
     return "Buenas noches 🌙";
   };
 
@@ -61,7 +62,23 @@ const UIMotivationalAgent = () => {
       }
     }
   };
+
+  const formatDate = () => {
+    const now = new Date();
+    const days = ["Domingo", "Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"];
+    const months = ["Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"];
   
+    const dayName = days[now.getDay()];
+    const day = now.getDate();
+    const monthName = months[now.getMonth()];
+    const year = now.getFullYear();
+  
+    return `${dayName} ${day} de ${monthName} del ${year}`;
+  };
+  
+  useEffect(() => {
+    setCurrentDate(formatDate());
+  }, []);
 
   const fetchQuotes = async () => {
     try {
@@ -176,11 +193,12 @@ const UIMotivationalAgent = () => {
 
   return (
     <div ref={screenshotRef} className={`flex flex-col items-center justify-center h-screen sm:min-h-[80vh] min-h-[calc(100vh-50px)] transition-all duration-1000 ${backgroundClass} text-center p-4`}>
-      <p className={`text-[5rem] ${backgroundClass} font-semibold`}>{currentTime}</p>
-
-      <h1 className="lg:text-3xl text-[1.5rem] font-bold mb-6 flex items-center gap-2">
-        {getGreeting()}
+      
+      <h1 className="lg:text-3xl text-[1.5rem] font-bold flex items-center gap-2">
+        {getGreeting()} 
       </h1>
+      <p className={`text-[1rem] ${backgroundClass} font-semibold`}>{currentDate}</p>
+      <p className={`text-[5rem] ${backgroundClass} font-semibold`}>{currentTime}</p>
       <div className={`${backgroundClass} text-center p-2 flex flex-col justify-around items-center lg:shadow-md max-w-lg h-[8rem]`}>
         <p className="lg:text-sm text-[0.8rem] italic">{quoteText}</p>
 
