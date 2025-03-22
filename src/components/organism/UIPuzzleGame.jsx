@@ -709,7 +709,7 @@ const UIPuzzleGame = () => {
       </div>
 
       <p className="text-gray-300 mt-4 md:text-[1rem] text-[0.8rem] ">
-        V.1.0.2 - Creado con amor
+        V.1.0.5 - Creado con amor
       </p>
     </div>
   );
