@@ -276,6 +276,14 @@ const UIPuzzleGame = () => {
         };
       }
 
+      if (selectedSublevel < SUBLEVELS && !updatedProgress[selectedLevel][selectedSublevel + 1]) {
+        updatedProgress[selectedLevel][selectedSublevel + 1] = {
+          completed: false,
+          bestTime: null,
+        };
+      }
+
+
       localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
       setProgress(updatedProgress);
     }
@@ -429,26 +437,29 @@ const UIPuzzleGame = () => {
         <div className="py-4">
           <div className="grid grid-cols-3 gap-4">
             {Array.from({ length: SUBLEVELS }, (_, i) => {
-              const isUnlocked = i === 0 || progress[selectedLevel]?.[i + 1];
-              const hasTime = progress[selectedLevel]?.[i + 1]?.bestTime;
+              const sublevelNumber = i + 1;
+              const hasCompletedPrevious =
+                sublevelNumber === 1 || progress[selectedLevel]?.[sublevelNumber - 1];
+              const hasTime = progress[selectedLevel]?.[sublevelNumber]?.bestTime;
 
               return (
                 <button
-                  key={i}
-                  className={`p-6 px-[2rem] text-white font-bold rounded-lg transition ${!isUnlocked
-                    ? "bg-gray-400 cursor-not-allowed"
-                    : hasTime
-                      ? "bg-green-600 hover:bg-green-500"
-                      : "bg-red-600 hover:bg-red-500"
+                  key={sublevelNumber}
+                  className={`p-6 px-[2rem] text-white font-bold rounded-lg transition ${!hasCompletedPrevious
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : hasTime
+                        ? "bg-green-600 hover:bg-green-500"
+                        : "bg-red-600 hover:bg-red-500"
                     }`}
-                  onClick={() => isUnlocked && setSelectedSublevel(i + 1)}
-                  disabled={!isUnlocked}
+                  onClick={() => hasCompletedPrevious && setSelectedSublevel(sublevelNumber)}
+                  disabled={!hasCompletedPrevious}
                 >
-                  {selectedLevel}
-                  {i + 1}
+                  {selectedLevel}{sublevelNumber}
                 </button>
               );
             })}
+
+
 
 
           </div>
@@ -526,7 +537,7 @@ const UIPuzzleGame = () => {
                     const updatedProgress = { ...progress };
 
                     updatedProgress[selectedLevel][selectedSublevel] = {
-                      completed: false,
+                      completed: true,
                       bestTime: null,
                     };
 
@@ -538,7 +549,6 @@ const UIPuzzleGame = () => {
                   } else {
                     startGame();
                   }
-
                 }}
                 className="px-6 py-2 font-bold bg-green-600 text-white rounded-lg w-full"
               >
