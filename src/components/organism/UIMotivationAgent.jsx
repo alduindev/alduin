@@ -212,7 +212,7 @@ const UIMotivationalAgent = () => {
       <p className={`text-[1rem] ${backgroundClass} font-semibold`}>{currentDate}</p>
       <p className={`text-[5rem] ${backgroundClass} font-semibold`}>{currentTime}</p>
       <div className={`${backgroundClass} text-center p-2 flex flex-col justify-around items-center lg:shadow-md max-w-lg h-[8rem]`}>
-        <p className="lg:text-sm text-[0.8rem] italic">{quoteText}</p>
+        <p className="lg:text-sm text-[3rem] italic">{quoteText}</p>
 
         {quoteAuthor && <p className={`text-[1rem] ${backgroundClass} mt-2`}>{quoteAuthor}</p>}
       </div>
