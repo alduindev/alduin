@@ -340,378 +340,380 @@ const UIPuzzleGame = () => {
 
 
   return (
-    <div
-      className={`flex flex-col items-center justify-center min-h-screen transition-all duration-700 ${isDarkMode
-        ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
-        : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
-        }`}
-      style={{ overflow: "hidden" }}
-    >
-      {gameStarted && (
-        <div className="md:w-[20%] w-[90%] mt-2 flex flex-col gap-2">
+    <>
+      {gameWon && (
+        <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black bg-opacity-90 text-center p-6">
+          <h2 className="text-4xl font-bold text-green-500 mb-4">
+            🎉 ¡FELICIDADES! 🎉
+          </h2>
           <button
-            onClick={isPaused ? resumeGame : pauseGame}
-            className="px-6 py-2 font-bold bg-yellow-500 text-white rounded-lg w-full"
-          >
-            {isPaused ? "Reanudar" : "Pausar"}
-          </button>
+            onClick={() => {
+              const updatedProgress = { ...progress };
 
-          <button
-            onClick={setupWinScenario}
-            className="px-6 py-2 font-bold bg-blue-500 text-white rounded-lg w-full"
-          >
-            Dejar a 1 jugada
-          </button>
-        </div>
-      )}
-
-      {Object.keys(progress).length > 0 && (
-        <button
-          onClick={() => setShowModal(true)}
-          className="lg:absolute top-6 md:right-6 p-2 lg:mt-0 mt-2 bg-gray-200 text-white rounded-full shadow-lg hover:bg-gray-100 transition"
-        >
-          <img
-            src="assets/icon/ico_gear.svg"
-            alt="Configuración"
-            className="lg:w-8 w-4 lg:h-8 h-4"
-          />
-        </button>
-      )}
-
-      <h1 className="lg:text-[4rem] text-[3rem] max-w-full text-center">
-        MAGICPUZZLE
-      </h1>
-
-      {showModal && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
-          <div className="bg-white p-6 rounded-lg shadow-lg text-center text-green-900 xl:w-auto w-[90%]">
-            <h2 className="text-2xl font-bold mb-4">Puntuación</h2>
-            <div className="w-full max-h-[400px] h-[400px] overflow-x-auto overflow-y-auto">
-              <table className="w-full border-collapse border border-gray-300 text-center">
-                <thead className="sticky top-0 bg-gray-200 z-10">
-                  <tr>
-                    <th className="p-2 border border-gray-300">Nivel</th>
-                    <th className="p-2 border border-gray-300">Subnivel</th>
-                    <th className="p-2 border border-gray-300">Tiempo</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {Object.entries(progress).map(([level, sublevels]) => (
-                    <React.Fragment key={level}>
-                      <tr
-                        onClick={() => toggleLevel(level)}
-                        className="cursor-pointer bg-gray-100 hover:bg-gray-300 transition-colors"
-                      >
-                        <td
-                          className="p-2 border border-gray-300 font-bold"
-                          colSpan={3}
-                        >
-                          {expandedLevels[level] ? "▼" : "▶"} Nivel {level}
-                        </td>
-                      </tr>
-                      {expandedLevels[level] &&
-                        Object.entries(sublevels)
-                          .filter(([_, data]) => data.status !== false)
-                          .map(([sublevel, data]) => (
-                            <tr key={`${level}-${sublevel}`} className="bg-white">
-                              <td className="p-2 border border-gray-300">{level}</td>
-                              <td className="p-2 border border-gray-300">{sublevel}</td>
-                              <td className="p-2 border border-gray-300">
-                                {data.bestTime ? `${data.bestTime}s` : "No completado"}
-                              </td>
-                            </tr>
-                          ))}
-
-                    </React.Fragment>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-
-            <button
-              className="mt-4 px-6 py-2 bg-yellow-500 text-white rounded-lg mr-2"
-              onClick={() => {
-                localStorage.removeItem("puzzleProgress");
-                setProgress({});
-              }}
-            >
-              Reiniciar
-            </button>
-
-            <button
-              className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg"
-              onClick={() => setShowModal(false)}
-            >
-              Cerrar
-            </button>
-          </div>
-        </div>
-      )}
-
-      {!selectedLevel ? (
-        <div className="py-4">
-          <div className="grid grid-cols-3 gap-4">
-            {LEVELS.map((level, i) => {
-              const isUnlocked =
-                i === 0 || progress[LEVELS[i - 1]]?.[SUBLEVELS];
-              return (
-                <button
-                  key={level}
-                  className={`xl:p-6 p-3 py-6 text-white font-bold text-lg ${isUnlocked ? COLORS[i] : "bg-gray-400 cursor-not-allowed"
-                    } rounded-lg`}
-                  onClick={() => isUnlocked && handleSelectLevel(level)}
-                  disabled={!isUnlocked}
-                >
-                  Nivel {level}
-                </button>
-              );
-            })}
-          </div>
-        </div>
-      ) : !selectedSublevel ? (
-        <div className="py-4">
-          <div className="grid grid-cols-3 gap-4">
-            {Array.from({ length: SUBLEVELS }, (_, i) => {
-              const sublevelData = progress[selectedLevel]?.[i + 1];
-              const isUnlocked = sublevelData?.status === true || i === 0;
-
-              let bgColor = "bg-gray-400";
-              if (sublevelData?.status === true && sublevelData?.completed === true) {
-                bgColor = "bg-green-600";
-              } else if (sublevelData?.status === true && sublevelData?.completed === false) {
-                bgColor = "bg-red-600";
+              if (!updatedProgress[selectedLevel]) {
+                updatedProgress[selectedLevel] = {};
               }
 
-              return (
-                <button
-                  key={i}
-                  className={`p-6 px-[2rem] text-white font-bold rounded-lg ${isUnlocked ? bgColor : "bg-gray-400 cursor-not-allowed"
-                    }`}
-                  onClick={() => {
-                    if (isUnlocked) {
-                      if (!sublevelData) {
-                        const updatedProgress = { ...progress };
+              const prevData = updatedProgress[selectedLevel][selectedSublevel] || {};
+              updatedProgress[selectedLevel][selectedSublevel] = {
+                completed: true,
+                bestTime:
+                  !prevData.bestTime || elapsedTime < prevData.bestTime
+                    ? elapsedTime
+                    : prevData.bestTime,
+                status: true,
+              };
 
-                        if (!updatedProgress[selectedLevel]) {
-                          updatedProgress[selectedLevel] = {};
-                        }
+              if (selectedSublevel < SUBLEVELS) {
+                const next = selectedSublevel + 1;
 
-                        updatedProgress[selectedLevel][i + 1] = {
-                          completed: false,
-                          bestTime: null,
-                          status: true,
-                        };
-
-                        localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
-                        setProgress(updatedProgress);
-                      }
-
-                      setSelectedSublevel(i + 1);
-                    }
-                  }}
-                  disabled={!isUnlocked}
-                >
-                  {selectedLevel}
-                  {i + 1}
-                </button>
-              );
-            })}
-
-
-
-          </div>
-          <button
-            className="mt-4 px-6 py-2 bg-orange-600 text-white font-bold rounded-lg w-full"
-            onClick={() => setSelectedLevel(null)}
-          >
-            Volver
-          </button>
-        </div>
-
-      ) : (
-        <>
-          <h2 className="text-xl font-bold">
-            {selectedLevel} {selectedSublevel}
-          </h2>
-          <p className="md:text-[2rem] text-[1rem] font-semibold">
-            ⏱{elapsedTime}s
-          </p>
-          {isLoading ? (
-            <div className="w-[10rem] h-[10rem] flex flex-col items-center justify-center m-6">
-              <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-              <p className="mt-2 text-gray-500 text-sm font-semibold">
-                Descargando imagen...
-              </p>
-            </div>
-          ) : (
-            <img
-              src={imageURL}
-              alt="Referencia"
-              className="xl:w-[10rem] w-[10rem] h-auto border border-black rounded mb-4"
-            />
-          )}
-
-          {gameWon && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#000000f2] bg-opacity-90 text-center p-6 rounded-lg shadow-lg z-10">
-              <h2 className="text-3xl font-bold text-green-600">
-                🎉 ¡FELICIDADES! 🎉
-              </h2>
-              <button
-                onClick={() => {
-                  const updatedProgress = { ...progress };
-
-                  if (!updatedProgress[selectedLevel]) {
-                    updatedProgress[selectedLevel] = {};
-                  }
-
-                  const prevData = updatedProgress[selectedLevel][selectedSublevel] || {};
-                  updatedProgress[selectedLevel][selectedSublevel] = {
-                    completed: true,
-                    bestTime:
-                      !prevData.bestTime || elapsedTime < prevData.bestTime
-                        ? elapsedTime
-                        : prevData.bestTime,
+                if (!updatedProgress[selectedLevel][next]) {
+                  updatedProgress[selectedLevel][next] = {
+                    completed: false,
+                    bestTime: null,
                     status: true,
                   };
+                } else if (!updatedProgress[selectedLevel][next].status) {
+                  updatedProgress[selectedLevel][next] = {
+                    ...updatedProgress[selectedLevel][next],
+                    status: true,
+                  };
+                }
 
-                  if (selectedSublevel < SUBLEVELS) {
-                    const next = selectedSublevel + 1;
+                const afterNext = next + 1;
+                if (!updatedProgress[selectedLevel][afterNext] && afterNext <= SUBLEVELS) {
+                  updatedProgress[selectedLevel][afterNext] = {
+                    completed: false,
+                    bestTime: null,
+                    status: false,
+                  };
+                }
 
-                    if (!updatedProgress[selectedLevel][next]) {
-                      updatedProgress[selectedLevel][next] = {
-                        completed: false,
-                        bestTime: null,
-                        status: true,
-                      };
-                    } else if (!updatedProgress[selectedLevel][next].status) {
-                      updatedProgress[selectedLevel][next] = {
-                        ...updatedProgress[selectedLevel][next],
-                        status: true,
-                      };
-                    }
+                setSelectedSublevel(null);
+                setGameWon(false);
+                setGameStarted(false);
+              } else {
+                setSelectedLevel(null);
+                setSelectedSublevel(null);
+              }
 
-                    const afterNext = next + 1;
-                    if (!updatedProgress[selectedLevel][afterNext] && afterNext <= SUBLEVELS) {
-                      updatedProgress[selectedLevel][afterNext] = {
-                        completed: false,
-                        bestTime: null,
-                        status: false,
-                      };
-                    }
-
-                    setSelectedSublevel(null);
-                    setGameWon(false);
-                    setGameStarted(false);
-                  } else {
-                    setSelectedLevel(null);
-                    setSelectedSublevel(null);
-                  }
-
-                  localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
-                  setProgress(updatedProgress);
-                }}
-                className="mt-4 px-6 py-3 font-bold bg-green-600 text-white rounded-lg shadow-lg hover:scale-105 transition"
-              >
-                {selectedSublevel < SUBLEVELS ? "Siguiente" : "Volver al Menú"}
-              </button>
-
-
-            </div>
-          )}
-          {gameStarted && (
-            <div className="md:w-[20%] w-[90%] ">
-              <button
-                onClick={isPaused ? resumeGame : pauseGame}
-                className="px-6 py-2 font-bold bg-yellow-500 text-white rounded-lg w-full"
-              >
-                {isPaused ? "Reanudar" : "Pausar"}
-              </button>
-            </div>
-          )}
-
-          {!gameStarted && (
-            <div className="flex items-center justify-around md:w-[20%] w-[90%] gap-4">
-              <button
-                onClick={() => {
-                  if (progress[selectedLevel]?.[selectedSublevel]?.bestTime) {
-                    const updatedProgress = { ...progress };
-
-                    updatedProgress[selectedLevel][selectedSublevel] = {
-                      completed: false,
-                      bestTime: null,
-                      status: true,
-                    };
-
-
-                    localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
-                    setProgress(updatedProgress);
-                    setGameStarted(false);
-                    setGameWon(false);
-                    setElapsedTime(0);
-                  } else {
-                    startGame();
-                  }
-
-                }}
-                className="px-6 py-2 font-bold bg-green-600 text-white rounded-lg w-full"
-              >
-                {progress[selectedLevel]?.[selectedSublevel]?.bestTime
-                  ? "Reiniciar"
-                  : "Jugar"}
-              </button>
-
-              <button
-                className="px-4 py-2 font-bold bg-orange-600 text-white rounded-lg w-full"
-                onClick={goBack}
-              >
-                Volver
-              </button>
-            </div>
-          )}
-          <div className="relative scale-90">
-            {isLoading && (
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 bg-opacity-75 rounded-md">
-                <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
-                <p className="mt-2 text-white text-sm font-semibold">
-                  Cargando puzzle...
-                </p>
-              </div>
-            )}
-
-            <canvas
-              ref={canvasRef}
-              className="border border-black bg-gray-700 w-full min-w-[300px] aspect-square"
-              onClick={(e) => {
-                const rect = canvasRef.current.getBoundingClientRect();
-                const x = e.clientX - rect.left;
-                const y = e.clientY - rect.top;
-                const pieceSize = rect.width / gridSize;
-                const col = Math.floor(x / pieceSize);
-                const row = Math.floor(y / pieceSize);
-                moveTile(row * gridSize + col);
-              }}
-            />
-          </div>
-        </>
+              localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
+              setProgress(updatedProgress);
+            }}
+            className="px-6 py-3 font-bold bg-green-600 text-white rounded-lg hover:scale-105 transition"
+          >
+            {selectedSublevel < SUBLEVELS ? "Siguiente" : "Volver al Menú"}
+          </button>
+        </div>
       )}
 
       <div
-        className={`relative w-14 h-7 flex items-center bg-gray-400 rounded-full p-1 cursor-pointer transition-all duration-500 ${isDarkMode ? "bg-gray-800" : "bg-gray-300"
+        className={`flex flex-col items-center justify-center min-h-screen transition-all duration-700 ${isDarkMode
+          ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
+          : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
           }`}
-        onClick={toggleDarkMode}
+        style={{ overflow: "hidden" }}
       >
-        <div
-          className={`w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-md transform transition-all duration-500 ${isDarkMode ? "translate-x-7" : "translate-x-0"
-            }`}
-        >
-          {isDarkMode ? "🌙" : "☀️"}
-        </div>
-      </div>
+        {/* {gameStarted && (
+          <div className="md:w-[20%] w-[90%] mt-2 flex flex-col gap-2">
+            <button
+              onClick={isPaused ? resumeGame : pauseGame}
+              className="px-6 py-2 font-bold bg-yellow-500 text-white rounded-lg w-full"
+            >
+              {isPaused ? "Reanudar" : "Pausar"}
+            </button>
 
-      <p className="text-gray-300 mt-4 md:text-[1rem] text-[0.8rem] ">
-        V.1.0.5 - Creado con amor
-      </p>
-    </div>
+            <button
+              onClick={setupWinScenario}
+              className="px-6 py-2 font-bold bg-blue-500 text-white rounded-lg w-full"
+            >
+              Dejar a 1 jugada
+            </button>
+          </div>
+        )} */}
+
+        {Object.keys(progress).length > 0 && (
+          <button
+            onClick={() => setShowModal(true)}
+            className="lg:absolute top-6 md:right-6 p-2 lg:mt-0 mt-2 bg-gray-200 text-white rounded-full shadow-lg hover:bg-gray-100 transition"
+          >
+            <img
+              src="assets/icon/ico_gear.svg"
+              alt="Configuración"
+              className="lg:w-8 w-4 lg:h-8 h-4"
+            />
+          </button>
+        )}
+
+        <h1 className="lg:text-[4rem] text-[3rem] max-w-full text-center">
+          MAGICPUZZLE
+        </h1>
+
+        {showModal && (
+          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-20">
+            <div className="bg-white p-6 rounded-lg shadow-lg text-center text-green-900 xl:w-auto w-[90%]">
+              <h2 className="text-2xl font-bold mb-4">Puntuación</h2>
+              <div className="w-full max-h-[400px] h-[400px] overflow-x-auto overflow-y-auto">
+                <table className="w-full border-collapse border border-gray-300 text-center">
+                  <thead className="sticky top-0 bg-gray-200 z-10">
+                    <tr>
+                      <th className="p-2 border border-gray-300">Nivel</th>
+                      <th className="p-2 border border-gray-300">Subnivel</th>
+                      <th className="p-2 border border-gray-300">Tiempo</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(progress).map(([level, sublevels]) => (
+                      <React.Fragment key={level}>
+                        <tr
+                          onClick={() => toggleLevel(level)}
+                          className="cursor-pointer bg-gray-100 hover:bg-gray-300 transition-colors"
+                        >
+                          <td
+                            className="p-2 border border-gray-300 font-bold"
+                            colSpan={3}
+                          >
+                            {expandedLevels[level] ? "▼" : "▶"} Nivel {level}
+                          </td>
+                        </tr>
+                        {expandedLevels[level] &&
+                          Object.entries(sublevels)
+                            .filter(([_, data]) => data.status !== false)
+                            .map(([sublevel, data]) => (
+                              <tr key={`${level}-${sublevel}`} className="bg-white">
+                                <td className="p-2 border border-gray-300">{level}</td>
+                                <td className="p-2 border border-gray-300">{sublevel}</td>
+                                <td className="p-2 border border-gray-300">
+                                  {data.bestTime ? `${data.bestTime}s` : "No completado"}
+                                </td>
+                              </tr>
+                            ))}
+
+                      </React.Fragment>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <button
+                className="mt-4 px-6 py-2 bg-yellow-500 text-white rounded-lg mr-2"
+                onClick={() => {
+                  localStorage.removeItem("puzzleProgress");
+                  setProgress({});
+                }}
+              >
+                Reiniciar
+              </button>
+
+              <button
+                className="mt-4 px-6 py-2 bg-red-500 text-white rounded-lg"
+                onClick={() => setShowModal(false)}
+              >
+                Cerrar
+              </button>
+            </div>
+          </div>
+        )}
+
+        {!selectedLevel ? (
+          <div className="py-4">
+            <div className="grid grid-cols-3 gap-4">
+              {LEVELS.map((level, i) => {
+                const isUnlocked =
+                  i === 0 || progress[LEVELS[i - 1]]?.[SUBLEVELS];
+                return (
+                  <button
+                    key={level}
+                    className={`xl:p-6 p-3 py-6 text-white font-bold text-lg ${isUnlocked ? COLORS[i] : "bg-gray-400 cursor-not-allowed"
+                      } rounded-lg`}
+                    onClick={() => isUnlocked && handleSelectLevel(level)}
+                    disabled={!isUnlocked}
+                  >
+                    Nivel {level}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : !selectedSublevel ? (
+          <div className="py-4">
+            <div className="grid grid-cols-3 gap-4">
+              {Array.from({ length: SUBLEVELS }, (_, i) => {
+                const sublevelData = progress[selectedLevel]?.[i + 1];
+                const isUnlocked = sublevelData?.status === true || i === 0;
+
+                let bgColor = "bg-gray-400";
+                if (sublevelData?.status === true && sublevelData?.completed === true) {
+                  bgColor = "bg-green-600";
+                } else if (sublevelData?.status === true && sublevelData?.completed === false) {
+                  bgColor = "bg-red-600";
+                }
+
+                return (
+                  <button
+                    key={i}
+                    className={`p-6 px-[2rem] text-white font-bold rounded-lg ${isUnlocked ? bgColor : "bg-gray-400 cursor-not-allowed"
+                      }`}
+                    onClick={() => {
+                      if (isUnlocked) {
+                        if (!sublevelData) {
+                          const updatedProgress = { ...progress };
+
+                          if (!updatedProgress[selectedLevel]) {
+                            updatedProgress[selectedLevel] = {};
+                          }
+
+                          updatedProgress[selectedLevel][i + 1] = {
+                            completed: false,
+                            bestTime: null,
+                            status: true,
+                          };
+
+                          localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
+                          setProgress(updatedProgress);
+                        }
+
+                        setSelectedSublevel(i + 1);
+                      }
+                    }}
+                    disabled={!isUnlocked}
+                  >
+                    {selectedLevel}
+                    {i + 1}
+                  </button>
+                );
+              })}
+
+
+
+            </div>
+            <button
+              className="mt-4 px-6 py-2 bg-orange-600 text-white font-bold rounded-lg w-full"
+              onClick={() => setSelectedLevel(null)}
+            >
+              Volver
+            </button>
+          </div>
+
+        ) : (
+          <>
+            <h2 className="text-xl font-bold">
+              {selectedLevel} {selectedSublevel}
+            </h2>
+            <p className="md:text-[2rem] text-[1rem] font-semibold">
+              ⏱{elapsedTime}s
+            </p>
+            {isLoading ? (
+              <div className="w-[10rem] h-[10rem] flex flex-col items-center justify-center m-6">
+                <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                <p className="mt-2 text-gray-500 text-sm font-semibold">
+                  Descargando imagen...
+                </p>
+              </div>
+            ) : (
+              <img
+                src={imageURL}
+                alt="Referencia"
+                className="xl:w-[10rem] w-[10rem] h-auto border border-black rounded mb-4"
+              />
+            )}
+
+
+            {gameStarted && (
+              <div className="md:w-[20%] w-[90%] ">
+                <button
+                  onClick={isPaused ? resumeGame : pauseGame}
+                  className="px-6 py-2 font-bold bg-yellow-500 text-white rounded-lg w-full"
+                >
+                  {isPaused ? "Reanudar" : "Pausar"}
+                </button>
+              </div>
+            )}
+
+            {!gameStarted && (
+              <div className="flex items-center justify-around md:w-[20%] w-[90%] gap-4">
+                <button
+                  onClick={() => {
+                    if (progress[selectedLevel]?.[selectedSublevel]?.bestTime) {
+                      const updatedProgress = { ...progress };
+
+                      updatedProgress[selectedLevel][selectedSublevel] = {
+                        completed: false,
+                        bestTime: null,
+                        status: true,
+                      };
+
+
+                      localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
+                      setProgress(updatedProgress);
+                      setGameStarted(false);
+                      setGameWon(false);
+                      setElapsedTime(0);
+                    } else {
+                      startGame();
+                    }
+
+                  }}
+                  className="px-6 py-2 font-bold bg-green-600 text-white rounded-lg w-full"
+                >
+                  {progress[selectedLevel]?.[selectedSublevel]?.bestTime
+                    ? "Reiniciar"
+                    : "Jugar"}
+                </button>
+
+                <button
+                  className="px-4 py-2 font-bold bg-orange-600 text-white rounded-lg w-full"
+                  onClick={goBack}
+                >
+                  Volver
+                </button>
+              </div>
+            )}
+            <div className="relative scale-90">
+              {isLoading && (
+                <div className="absolute inset-0 flex flex-col items-center justify-center bg-gray-800 bg-opacity-75 rounded-md">
+                  <div className="w-12 h-12 border-4 border-gray-300 border-t-blue-500 rounded-full animate-spin"></div>
+                  <p className="mt-2 text-white text-sm font-semibold">
+                    Cargando puzzle...
+                  </p>
+                </div>
+              )}
+
+              <canvas
+                ref={canvasRef}
+                className="border border-black bg-gray-700 w-full min-w-[300px] aspect-square"
+                onClick={(e) => {
+                  const rect = canvasRef.current.getBoundingClientRect();
+                  const x = e.clientX - rect.left;
+                  const y = e.clientY - rect.top;
+                  const pieceSize = rect.width / gridSize;
+                  const col = Math.floor(x / pieceSize);
+                  const row = Math.floor(y / pieceSize);
+                  moveTile(row * gridSize + col);
+                }}
+              />
+            </div>
+          </>
+        )}
+
+        <div
+          className={`relative w-14 h-7 flex items-center bg-gray-400 rounded-full p-1 cursor-pointer transition-all duration-500 ${isDarkMode ? "bg-gray-800" : "bg-gray-300"
+            }`}
+          onClick={toggleDarkMode}
+        >
+          <div
+            className={`w-6 h-6 flex items-center justify-center bg-white rounded-full shadow-md transform transition-all duration-500 ${isDarkMode ? "translate-x-7" : "translate-x-0"
+              }`}
+          >
+            {isDarkMode ? "🌙" : "☀️"}
+          </div>
+        </div>
+
+        <p className="text-gray-300 mt-4 md:text-[1rem] text-[0.8rem] ">
+          V.1.0.5 - Creado con amor
+        </p>
+      </div>
+    </>
   );
 };
 
