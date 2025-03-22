@@ -214,7 +214,7 @@ const UIMotivationalAgent = () => {
       <div className={`${backgroundClass} text-center p-2 flex flex-col justify-around items-center lg:shadow-md max-w-lg h-[8rem]`}>
         <p className="lg:text-sm text-[0.8rem] italic">{quoteText}</p>
 
-        {quoteAuthor && <p className={`text-[0.7rem] ${backgroundClass} mt-2`}>{quoteAuthor}</p>}
+        {quoteAuthor && <p className={`text-[1rem] ${backgroundClass} mt-2`}>{quoteAuthor}</p>}
       </div>
       <button
         onClick={takeScreenshot}
