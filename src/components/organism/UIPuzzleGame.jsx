@@ -259,33 +259,37 @@ const UIPuzzleGame = () => {
     if (newTiles.every((tile, i) => tile === i)) {
       stopTimer();
       setGameWon(true);
-    
+
       const updatedProgress = { ...progress };
-    
+
       if (!updatedProgress[selectedLevel]) {
         updatedProgress[selectedLevel] = {};
       }
-    
-      // ✅ Guardar el mejor tiempo si es menor al anterior o si no existía
-      if (
-        !updatedProgress[selectedLevel][selectedSublevel] ||
-        elapsedTime < updatedProgress[selectedLevel][selectedSublevel].bestTime
-      ) {
-        updatedProgress[selectedLevel][selectedSublevel] = {
-          completed: true,
-          bestTime: elapsedTime,
+
+      updatedProgress[selectedLevel][selectedSublevel] = {
+        completed: true,
+        bestTime:
+          !updatedProgress[selectedLevel][selectedSublevel]?.bestTime ||
+            elapsedTime < updatedProgress[selectedLevel][selectedSublevel].bestTime
+            ? elapsedTime
+            : updatedProgress[selectedLevel][selectedSublevel].bestTime,
+        status: true,
+      };
+
+      const afterNext = selectedSublevel + 2;
+      if (afterNext <= SUBLEVELS && !updatedProgress[selectedLevel][afterNext]) {
+        updatedProgress[selectedLevel][afterNext] = {
+          completed: false,
+          bestTime: null,
+          status: false,
         };
       }
-    
-      // ✅ Desbloquear automáticamente el siguiente subnivel
-      if (selectedSublevel < SUBLEVELS) {
-        updatedProgress[selectedLevel][selectedSublevel + 1] = updatedProgress[selectedLevel][selectedSublevel + 1] || {};
-      }
-    
+
       localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
       setProgress(updatedProgress);
     }
-    
+
+
   };
 
   const [expandedLevels, setExpandedLevels] = useState({});
@@ -318,14 +322,49 @@ const UIPuzzleGame = () => {
     clearInterval(timer);
   };
 
+  const setupWinScenario = () => {
+    if (!image || !gridSize) return;
+
+    const totalTiles = gridSize * gridSize;
+    const finalTiles = Array.from({ length: totalTiles }, (_, i) => i);
+    const almostSolved = [...finalTiles];
+    const lastMovable = totalTiles - 2;
+    const empty = totalTiles - 1;
+
+    [almostSolved[lastMovable], almostSolved[empty]] = [almostSolved[empty], almostSolved[lastMovable]];
+
+    setPieces(almostSolved);
+    setEmptyIndex(lastMovable);
+    drawPuzzle(image, almostSolved, CANVAS_SIZE / gridSize);
+  };
+
+
   return (
     <div
       className={`flex flex-col items-center justify-center min-h-screen transition-all duration-700 ${isDarkMode
-          ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
-          : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
+        ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
+        : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
         }`}
       style={{ overflow: "hidden" }}
     >
+      {gameStarted && (
+        <div className="md:w-[20%] w-[90%] mt-2 flex flex-col gap-2">
+          <button
+            onClick={isPaused ? resumeGame : pauseGame}
+            className="px-6 py-2 font-bold bg-yellow-500 text-white rounded-lg w-full"
+          >
+            {isPaused ? "Reanudar" : "Pausar"}
+          </button>
+
+          <button
+            onClick={setupWinScenario}
+            className="px-6 py-2 font-bold bg-blue-500 text-white rounded-lg w-full"
+          >
+            Dejar a 1 jugada
+          </button>
+        </div>
+      )}
+
       {Object.keys(progress).length > 0 && (
         <button
           onClick={() => setShowModal(true)}
@@ -371,21 +410,18 @@ const UIPuzzleGame = () => {
                         </td>
                       </tr>
                       {expandedLevels[level] &&
-                        Object.entries(sublevels).map(([sublevel, data]) => (
-                          <tr key={`${level}-${sublevel}`} className="bg-white">
-                            <td className="p-2 border border-gray-300">
-                              {level}
-                            </td>
-                            <td className="p-2 border border-gray-300">
-                              {sublevel}
-                            </td>
-                            <td className="p-2 border border-gray-300">
-                              {data.bestTime
-                                ? `${data.bestTime}s`
-                                : "No completado"}
-                            </td>
-                          </tr>
-                        ))}
+                        Object.entries(sublevels)
+                          .filter(([_, data]) => data.status !== false)
+                          .map(([sublevel, data]) => (
+                            <tr key={`${level}-${sublevel}`} className="bg-white">
+                              <td className="p-2 border border-gray-300">{level}</td>
+                              <td className="p-2 border border-gray-300">{sublevel}</td>
+                              <td className="p-2 border border-gray-300">
+                                {data.bestTime ? `${data.bestTime}s` : "No completado"}
+                              </td>
+                            </tr>
+                          ))}
+
                     </React.Fragment>
                   ))}
                 </tbody>
@@ -435,17 +471,44 @@ const UIPuzzleGame = () => {
       ) : !selectedSublevel ? (
         <div className="py-4">
           <div className="grid grid-cols-3 gap-4">
-          {Array.from({ length: SUBLEVELS }, (_, i) => {
-              const isUnlocked = i === 0 || progress[selectedLevel]?.[i];
+            {Array.from({ length: SUBLEVELS }, (_, i) => {
+              const sublevelData = progress[selectedLevel]?.[i + 1];
+              const isUnlocked = sublevelData?.status === true || i === 0;
+
+              let bgColor = "bg-gray-400";
+              if (sublevelData?.status === true && sublevelData?.completed === true) {
+                bgColor = "bg-green-600";
+              } else if (sublevelData?.status === true && sublevelData?.completed === false) {
+                bgColor = "bg-red-600";
+              }
+
               return (
                 <button
                   key={i}
-                  className={`p-6 px-[2rem] text-white font-bold rounded-lg ${
-                    isUnlocked
-                      ? "bg-green-600"
-                      : "bg-gray-400 cursor-not-allowed"
-                  }`}
-                  onClick={() => isUnlocked && setSelectedSublevel(i + 1)}
+                  className={`p-6 px-[2rem] text-white font-bold rounded-lg ${isUnlocked ? bgColor : "bg-gray-400 cursor-not-allowed"
+                    }`}
+                  onClick={() => {
+                    if (isUnlocked) {
+                      if (!sublevelData) {
+                        const updatedProgress = { ...progress };
+
+                        if (!updatedProgress[selectedLevel]) {
+                          updatedProgress[selectedLevel] = {};
+                        }
+
+                        updatedProgress[selectedLevel][i + 1] = {
+                          completed: false,
+                          bestTime: null,
+                          status: true,
+                        };
+
+                        localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
+                        setProgress(updatedProgress);
+                      }
+
+                      setSelectedSublevel(i + 1);
+                    }
+                  }}
                   disabled={!isUnlocked}
                 >
                   {selectedLevel}
@@ -453,6 +516,8 @@ const UIPuzzleGame = () => {
                 </button>
               );
             })}
+
+
 
           </div>
           <button
@@ -493,21 +558,64 @@ const UIPuzzleGame = () => {
               </h2>
               <button
                 onClick={() => {
+                  const updatedProgress = { ...progress };
+
+                  if (!updatedProgress[selectedLevel]) {
+                    updatedProgress[selectedLevel] = {};
+                  }
+
+                  const prevData = updatedProgress[selectedLevel][selectedSublevel] || {};
+                  updatedProgress[selectedLevel][selectedSublevel] = {
+                    completed: true,
+                    bestTime:
+                      !prevData.bestTime || elapsedTime < prevData.bestTime
+                        ? elapsedTime
+                        : prevData.bestTime,
+                    status: true,
+                  };
+
                   if (selectedSublevel < SUBLEVELS) {
-                    setSelectedSublevel(selectedSublevel + 1);
+                    const next = selectedSublevel + 1;
+
+                    if (!updatedProgress[selectedLevel][next]) {
+                      updatedProgress[selectedLevel][next] = {
+                        completed: false,
+                        bestTime: null,
+                        status: true,
+                      };
+                    } else if (!updatedProgress[selectedLevel][next].status) {
+                      updatedProgress[selectedLevel][next] = {
+                        ...updatedProgress[selectedLevel][next],
+                        status: true,
+                      };
+                    }
+
+                    const afterNext = next + 1;
+                    if (!updatedProgress[selectedLevel][afterNext] && afterNext <= SUBLEVELS) {
+                      updatedProgress[selectedLevel][afterNext] = {
+                        completed: false,
+                        bestTime: null,
+                        status: false,
+                      };
+                    }
+
+                    setSelectedSublevel(null);
                     setGameWon(false);
                     setGameStarted(false);
                   } else {
                     setSelectedLevel(null);
                     setSelectedSublevel(null);
                   }
+
+                  localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
+                  setProgress(updatedProgress);
                 }}
                 className="mt-4 px-6 py-3 font-bold bg-green-600 text-white rounded-lg shadow-lg hover:scale-105 transition"
               >
-                {selectedSublevel < SUBLEVELS
-                  ? "Siguiente"
-                  : "Volver al Menú"}
+                {selectedSublevel < SUBLEVELS ? "Siguiente" : "Volver al Menú"}
               </button>
+
+
             </div>
           )}
           {gameStarted && (
@@ -531,7 +639,9 @@ const UIPuzzleGame = () => {
                     updatedProgress[selectedLevel][selectedSublevel] = {
                       completed: false,
                       bestTime: null,
+                      status: true,
                     };
+
 
                     localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
                     setProgress(updatedProgress);
