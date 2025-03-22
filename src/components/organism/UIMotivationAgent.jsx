@@ -212,9 +212,9 @@ const UIMotivationalAgent = () => {
       <p className={`text-[3rem] ${backgroundClass} font-semibold`}>{currentDate}</p>
       <p className={`text-[5rem] ${backgroundClass} font-semibold`}>{currentTime}</p>
       <div className={`${backgroundClass} text-center p-2 flex flex-col justify-around items-center lg:shadow-md max-w-lg h-[8rem]`}>
-        <p className="lg:text-sm text-[2rem] italic">{quoteText}</p>
+        <p className="lg:text-sm text-[1.5rem] italic">{quoteText}</p>
 
-        {quoteAuthor && <p className={`text-[1.5rem] ${backgroundClass} mt-2`}>{quoteAuthor}</p>}
+        {quoteAuthor && <p className={`text-[1rem] ${backgroundClass} mt-2`}>{quoteAuthor}</p>}
       </div>
       <button
         onClick={takeScreenshot}
