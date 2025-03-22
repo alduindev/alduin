@@ -259,13 +259,14 @@ const UIPuzzleGame = () => {
     if (newTiles.every((tile, i) => tile === i)) {
       stopTimer();
       setGameWon(true);
-
+    
       const updatedProgress = { ...progress };
-
+    
       if (!updatedProgress[selectedLevel]) {
         updatedProgress[selectedLevel] = {};
       }
-
+    
+      // ✅ Guardar el mejor tiempo si es menor al anterior o si no existía
       if (
         !updatedProgress[selectedLevel][selectedSublevel] ||
         elapsedTime < updatedProgress[selectedLevel][selectedSublevel].bestTime
@@ -275,18 +276,16 @@ const UIPuzzleGame = () => {
           bestTime: elapsedTime,
         };
       }
-
-      if (selectedSublevel < SUBLEVELS && !updatedProgress[selectedLevel][selectedSublevel + 1]) {
-        updatedProgress[selectedLevel][selectedSublevel + 1] = {
-          completed: false,
-          bestTime: null,
-        };
+    
+      // ✅ Desbloquear automáticamente el siguiente subnivel
+      if (selectedSublevel < SUBLEVELS) {
+        updatedProgress[selectedLevel][selectedSublevel + 1] = updatedProgress[selectedLevel][selectedSublevel + 1] || {};
       }
-
-
+    
       localStorage.setItem("puzzleProgress", JSON.stringify(updatedProgress));
       setProgress(updatedProgress);
     }
+    
   };
 
   const [expandedLevels, setExpandedLevels] = useState({});
@@ -322,8 +321,8 @@ const UIPuzzleGame = () => {
   return (
     <div
       className={`flex flex-col items-center justify-center min-h-screen transition-all duration-700 ${isDarkMode
-        ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
-        : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
+          ? "bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white"
+          : "bg-gradient-to-b from-white via-gray-100 to-gray-300 text-gray-900"
         }`}
       style={{ overflow: "hidden" }}
     >
@@ -436,31 +435,24 @@ const UIPuzzleGame = () => {
       ) : !selectedSublevel ? (
         <div className="py-4">
           <div className="grid grid-cols-3 gap-4">
-            {Array.from({ length: SUBLEVELS }, (_, i) => {
-              const sublevelNumber = i + 1;
-              const hasCompletedPrevious =
-                sublevelNumber === 1 || progress[selectedLevel]?.[sublevelNumber - 1];
-              const hasTime = progress[selectedLevel]?.[sublevelNumber]?.bestTime;
-
+          {Array.from({ length: SUBLEVELS }, (_, i) => {
+              const isUnlocked = i === 0 || progress[selectedLevel]?.[i];
               return (
                 <button
-                  key={sublevelNumber}
-                  className={`p-6 px-[2rem] text-white font-bold rounded-lg transition ${!hasCompletedPrevious
-                      ? "bg-gray-400 cursor-not-allowed"
-                      : hasTime
-                        ? "bg-green-600 hover:bg-green-500"
-                        : "bg-red-600 hover:bg-red-500"
-                    }`}
-                  onClick={() => hasCompletedPrevious && setSelectedSublevel(sublevelNumber)}
-                  disabled={!hasCompletedPrevious}
+                  key={i}
+                  className={`p-6 px-[2rem] text-white font-bold rounded-lg ${
+                    isUnlocked
+                      ? "bg-green-600"
+                      : "bg-gray-400 cursor-not-allowed"
+                  }`}
+                  onClick={() => isUnlocked && setSelectedSublevel(i + 1)}
+                  disabled={!isUnlocked}
                 >
-                  {selectedLevel}{sublevelNumber}
+                  {selectedLevel}
+                  {i + 1}
                 </button>
               );
             })}
-
-
-
 
           </div>
           <button
@@ -537,7 +529,7 @@ const UIPuzzleGame = () => {
                     const updatedProgress = { ...progress };
 
                     updatedProgress[selectedLevel][selectedSublevel] = {
-                      completed: true,
+                      completed: false,
                       bestTime: null,
                     };
 
@@ -549,6 +541,7 @@ const UIPuzzleGame = () => {
                   } else {
                     startGame();
                   }
+
                 }}
                 className="px-6 py-2 font-bold bg-green-600 text-white rounded-lg w-full"
               >
