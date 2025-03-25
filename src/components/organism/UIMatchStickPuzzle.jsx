@@ -104,18 +104,18 @@ const ThemeToggleButton = ({ theme, toggleTheme }) => (
   >
     {theme === 'light' ? (
       <svg
-      xmlns="http://www.w3.org/2000/svg"
-      className="h-6 w-6"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="2"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-    </svg>
-    
+        xmlns="http://www.w3.org/2000/svg"
+        className="h-6 w-6"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      >
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+      </svg>
+
     ) : (
       <svg className="h-5 w-5 text-gray-600" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
         <circle cx="12" cy="12" r="5" />
@@ -166,7 +166,7 @@ const Cell = ({ row, col, cell, selected, swapAnimation, handleCellClick, isAnim
   return (
     <div
       key={`${row}-${col}`}
-      className={`w-10 h-10 flex items-center justify-center rounded-full cursor-pointer transition-transform duration-300 ${isSwappingFrom ? 'transform translate-x-5' : isSwappingTo ? 'transform -translate-x-5' : ''
+      className={`lg:w-16 w-10 lg:h-16 h-10 flex items-center justify-center rounded-full cursor-pointer lg:text-[2rem] text-[1.5rem] transition-transform duration-300 ${isSwappingFrom ? 'transform translate-x-5' : isSwappingTo ? 'transform -translate-x-5' : ''
         } ${getEmoticonColor(cell)} ${isAnimating ? 'opacity-50' : ''}`}
       onClick={() => handleCellClick(row, col)}
     >
@@ -359,6 +359,45 @@ export default function UIMatchStickPuzzle() {
     }
   }
 
+  let touchStartX = null
+  let touchStartY = null
+
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0]
+    touchStartX = touch.clientX
+    touchStartY = touch.clientY
+  }
+
+  const handleTouchEnd = (e, row, col) => {
+    if (touchStartX === null || touchStartY === null) return
+
+    const touch = e.changedTouches[0]
+    const dx = touch.clientX - touchStartX
+    const dy = touch.clientY - touchStartY
+
+    const absDx = Math.abs(dx)
+    const absDy = Math.abs(dy)
+
+    let targetRow = row
+    let targetCol = col
+
+    if (absDx > absDy) {
+      // Swipe horizontal
+      targetCol = dx > 0 ? col + 1 : col - 1
+    } else {
+      // Swipe vertical
+      targetRow = dy > 0 ? row + 1 : row - 1
+    }
+
+    // Validación
+    if (targetRow >= 0 && targetRow < GRID_SIZE && targetCol >= 0 && targetCol < GRID_SIZE) {
+      handleCellClick(targetRow, targetCol)
+    }
+
+    touchStartX = null
+    touchStartY = null
+  }
+
   const scoreThresholds = {
     'A1': 50, 'A2': 100, 'A3': 150, 'A4': 200, 'A5': 250,
     'A6': 300, 'A7': 350, 'A8': 400, 'A9': 450,
@@ -468,6 +507,8 @@ export default function UIMatchStickPuzzle() {
                       handleCellClick={handleCellClick}
                       isAnimating={isAnimating}
                       isMatched={isMatched}
+                      onTouchStart={handleTouchStart}
+                      onTouchEnd={(e) => handleTouchEnd(e, row, col)}
                     />
                   )
                 })
