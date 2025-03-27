@@ -8,6 +8,7 @@ import PageBreakout from "../pages/PageBreakout";
 import PageTesting from "../pages/PageTesting";
 import PagePaint from "../pages/PagePaint";
 import PageMatchstick from "../pages/PageMatchstick";
+import PageEmulator from "../pages/PageEmulator";
 
 export default function RouterMain() {
   return (
@@ -17,6 +18,7 @@ export default function RouterMain() {
         <Route path="/music" element={<PageMusic />} />
         <Route path="/puzzle" element={<PagePuzzle />} />
         <Route path="/matchstick" element={<PageMatchstick />} />
+        <Route path="/emulator" element={<PageEmulator />} />
         <Route path="/paint" element={<PagePaint />} />
         <Route path="/website" element={<PageWebsite />} />
         <Route path="/tetris" element={<PageTetris />} />

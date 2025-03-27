@@ -8,7 +8,7 @@
     "build": "env-cmd -f ./src/environments/.env.dev vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "postbuild": "cp build/index.html build/404.html",  
+    "postbuild": "cp build/index.html build/404.html",
     "predeploy": "yarn build",
     "deploy": "gh-pages -d build"
   },
@@ -23,6 +23,7 @@
     "crypto-js": "^4.1.1",
     "html2canvas": "^1.4.1",
     "jquery": "^3.7.1",
+    "jsnes": "^1.2.1",
     "react": "^18.2.0",
     "react-calendar": "^4.7.0",
     "react-chartjs-2": "^5.2.0",

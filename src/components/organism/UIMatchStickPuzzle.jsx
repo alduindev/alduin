@@ -191,7 +191,6 @@ const getEmoticonColor = (emoticon) => {
   return index !== -1 ? colorClasses[index % colorClasses.length] : 'bg-gray-200'
 }
 
-
 export default function UIMatchStickPuzzle() {
   const [currentView, setCurrentView] = useState('levels')
   const [selectedLevel, setSelectedLevel] = useState(null)
