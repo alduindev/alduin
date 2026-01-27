@@ -1,15 +1,10 @@
 import React, { useState } from "react";
 
 const menuItems = [
-  // { name: "Inicio", href: "/" },
-  // { name: "Buscar", href: "/buscar" },
-  // { name: "Contacto", href: "/contacto" },
+  
 ];
 
-const buttons = [
-  // { text: "Iniciar", className: "bg-gray-200 text-gray-800 shadow-lg hover:shadow-xl active:shadow-inner" },
-  // { text: "Registrar", className: "bg-gray-200 text-gray-800 shadow-lg hover:shadow-xl active:shadow-inner" },
-];
+const buttons = [];
 
 const HeaderButton = ({ text, icon, className, onClick }) => (
   <button
