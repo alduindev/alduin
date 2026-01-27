@@ -41,8 +41,7 @@ export default function UIEmu() {
       nesRef.current.loadROM(binaryString);
       nesRef.current.start();
     };
-    reader.readAsBinaryString(file); // 👈 ESTE es el cambio clave
-  };
+    reader.readAsBinaryString(file);
 
   return (
     <div className="flex flex-col items-center gap-4">
