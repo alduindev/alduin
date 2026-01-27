@@ -4,31 +4,31 @@ import UIPuzzle from '../components/organism/UIPuzzle';
 const saveUser = async (username, email, password) => {
     let users = JSON.parse(localStorage.getItem("users")) || {};
 
-    // Verificar si el usuario ya existe
+ 
     const userExists = Object.values(users).some(user => user.data.username === username);
     if (userExists) {
         return false; // Usuario ya registrado
     }
 
-    // Crear un ID único para el usuario
+    
     const userId = Date.now().toString(); // Genera un ID basado en timestamp
 
-    // Guardar usuario en localStorage
+
     users[userId] = {
         data: { username, email, password },
         puzzleProgress: {} // Se inicia vacío
     };
 
     localStorage.setItem("users", JSON.stringify(users));
-    return userId; // Retorna el ID del usuario registrado
+    return userId; 
 };
 
 const validateLogin = async (username, password) => {
     let users = JSON.parse(localStorage.getItem("users")) || {};
 
-    // Buscar usuario por username
+    
     const userEntry = Object.entries(users).find(([id, user]) => user.data.username === username);
-    if (!userEntry) return 'no_user'; // No encontrado
+    if (!userEntry) return 'no_user';
 
     const [userId, userData] = userEntry;
     
