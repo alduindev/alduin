@@ -15,6 +15,8 @@ const PageWebsite = () => {
   return (
 <>
   <UIHeader />
+  
+  
   <UIBannerSlider videos={videos} currentIndex={currentVideoIndex} setCurrentIndex={setCurrentVideoIndex} />
   <UIFooter />
 </>
