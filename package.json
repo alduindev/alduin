@@ -35,6 +35,7 @@
     "react-select": "^5.8.0",
     "react-tetris": "^0.4.0",
     "sha256": "^0.2.0",
+    "three": "^0.183.2",
     "sweetalert2": "^11.12.4"
   },
   "devDependencies": {
