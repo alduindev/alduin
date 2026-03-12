@@ -21,7 +21,7 @@ export default function RouterMain() {
         <Route path="/music" element={<PageMusic />} />
         <Route path="/puzzle" element={<PagePuzzle />} />
         <Route path="/matchstick" element={<PageMatchstick />} />
-        <Route path="/emulator" element={<PageEmulator />} />
+        {/* <Route path="/emulator" element={<PageEmulator />} /> */}
         <Route path="/windows" element={<PageWin />} />
         <Route path="/paint" element={<PagePaint />} />
         <Route path="/website" element={<PageWebsite />} />
