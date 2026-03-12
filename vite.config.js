@@ -10,7 +10,7 @@ export default defineConfig({
   base: "/alduin/",
   plugins: [react()],
   optimizeDeps: {
-    include: ['esm-dep > cjs-dep'],
+    include: ['three', '@react-three/fiber', '@react-three/drei', 'react', 'react-dom', 'react-router-dom']
   },
   define: {
     'process.env': {
