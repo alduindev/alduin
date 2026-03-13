@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Text, MapControls } from "@react-three/drei";
 
@@ -152,7 +152,7 @@ const BackdropPlane = ({ visible }) => {
   });
 
   return (
-    <mesh position={[0, 0, -0.6]}>
+    <mesh position={[0, 0, -1]}>
       <planeGeometry args={[100, 100]} />
       <meshBasicMaterial
         ref={materialRef}
@@ -166,12 +166,42 @@ const BackdropPlane = ({ visible }) => {
 
 const ExplodedGift = ({ color, ribbonColor, progress, sizeMultiplier = 1 }) => {
   const pieces = [
-    { pos: [-0.9, 0.65, 0], rot: [1.3, -1.1, 0.8], size: [0.58, 0.22, 0.58], c: color },
-    { pos: [0.9, 0.45, 0], rot: [-1.2, 1.2, -0.7], size: [0.58, 0.22, 0.58], c: color },
-    { pos: [0, 1.2, 0], rot: [0.6, 1.8, 1.3], size: [0.76, 0.18, 0.76], c: color },
-    { pos: [-1.05, -0.35, 0.15], rot: [1.2, 0.5, -1.0], size: [0.38, 0.38, 0.38], c: color },
-    { pos: [1.05, -0.2, -0.15], rot: [-1.0, -0.6, 1.1], size: [0.38, 0.38, 0.38], c: color },
-    { pos: [0, -1.0, 0], rot: [0.8, -1.2, 0.8], size: [0.42, 0.42, 0.42], c: ribbonColor },
+    {
+      pos: [-0.9, 0.65, 0],
+      rot: [1.3, -1.1, 0.8],
+      size: [0.58, 0.22, 0.58],
+      c: color,
+    },
+    {
+      pos: [0.9, 0.45, 0],
+      rot: [-1.2, 1.2, -0.7],
+      size: [0.58, 0.22, 0.58],
+      c: color,
+    },
+    {
+      pos: [0, 1.2, 0],
+      rot: [0.6, 1.8, 1.3],
+      size: [0.76, 0.18, 0.76],
+      c: color,
+    },
+    {
+      pos: [-1.05, -0.35, 0.15],
+      rot: [1.2, 0.5, -1.0],
+      size: [0.38, 0.38, 0.38],
+      c: color,
+    },
+    {
+      pos: [1.05, -0.2, -0.15],
+      rot: [-1.0, -0.6, 1.1],
+      size: [0.38, 0.38, 0.38],
+      c: color,
+    },
+    {
+      pos: [0, -1.0, 0],
+      rot: [0.8, -1.2, 0.8],
+      size: [0.42, 0.42, 0.42],
+      c: ribbonColor,
+    },
   ];
 
   return (
@@ -230,7 +260,8 @@ const GiftBox = ({
   useFrame((_, delta) => {
     if (!groupRef.current) return;
 
-    const scaleTarget = selected || revealed ? (isMobile ? 2.1 : 1.95) : hoverRef.current ? 1.08 : 1;
+    const scaleTarget =
+      selected || revealed ? (isMobile ? 2.1 : 1.95) : hoverRef.current ? 1.08 : 1;
 
     groupRef.current.position.x = lerp(
       groupRef.current.position.x,
@@ -299,13 +330,14 @@ const GiftBox = ({
         hoverRef.current = false;
       }}
     >
-      <mesh position={[0, 0, -0.08]} onClick={handleClick}>
+      <mesh position={[0, 0, -0.12]} onClick={handleClick}>
         <planeGeometry args={[boxSize * 1.9, boxSize * 1.9]} />
         <meshBasicMaterial
           ref={glowMaterialRef}
           color={gift.color}
           transparent
           opacity={0.06}
+          depthWrite={false}
         />
       </mesh>
 
@@ -395,8 +427,6 @@ const GiftBox = ({
       <Text
         position={[0, 0, boxSize / 2 + 0.04]}
         fontSize={isMobile ? 0.32 : 0.28}
-        font="https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fAKk.woff2"
-        fontWeight={700}
         color="#fef3c7"
         anchorX="center"
         anchorY="middle"
@@ -430,6 +460,8 @@ const Scene = ({
     <>
       <MapControls
         ref={controlsRef}
+        makeDefault
+        target={[0, 0, 0]}
         enableRotate={false}
         enableDamping
         dampingFactor={0.08}
@@ -594,6 +626,7 @@ const PageCube = () => {
 
       <Canvas
         orthographic
+        frameloop="always"
         camera={{
           zoom: boardConfig.zoom,
           position: [0, 0, 10],
@@ -604,16 +637,18 @@ const PageCube = () => {
         dpr={isMobile ? [1, 1.25] : [1, 1.5]}
         gl={{ antialias: true, powerPreference: "high-performance" }}
       >
-        <Scene
-          gifts={gifts}
-          selectedId={selectedId}
-          revealedId={revealedId}
-          onSelect={handleSelect}
-          onReveal={handleReveal}
-          isMobile={isMobile}
-          cameraZoom={boardConfig.zoom}
-          controlsRef={controlsRef}
-        />
+        <Suspense fallback={null}>
+          <Scene
+            gifts={gifts}
+            selectedId={selectedId}
+            revealedId={revealedId}
+            onSelect={handleSelect}
+            onReveal={handleReveal}
+            isMobile={isMobile}
+            cameraZoom={boardConfig.zoom}
+            controlsRef={controlsRef}
+          />
+        </Suspense>
       </Canvas>
 
       <div className="pointer-events-none absolute left-1/2 top-3 z-20 w-[calc(100%-20px)] max-w-[680px] -translate-x-1/2 rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-center text-white shadow-2xl backdrop-blur-md md:top-4 md:px-5">
