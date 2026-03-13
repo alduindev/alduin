@@ -393,14 +393,20 @@ const GiftBox = ({
       )}
 
       <Text
-        position={[0, 0, boxSize / 2 + 0.03]}
-        fontSize={isMobile ? 0.16 : 0.14}
-        color="white"
+        position={[0, 0, boxSize / 2 + 0.04]}
+        fontSize={isMobile ? 0.32 : 0.28}
+        font="https://fonts.gstatic.com/s/roboto/v29/KFOlCnqEu92Fr1MmEU9fAKk.woff2"
+        fontWeight={700}
+        color="#fef3c7"
         anchorX="center"
         anchorY="middle"
-        outlineWidth={0.012}
-        outlineColor="black"
+        outlineWidth={0.028}
+        outlineColor="#1f2937"
+        outlineBlur={0.012}
+        letterSpacing={0.02}
         onClick={handleClick}
+        renderOrder={10}
+        depthTest={false}
       >
         {gift.number}
       </Text>
