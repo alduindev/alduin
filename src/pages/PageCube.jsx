@@ -2,22 +2,18 @@ import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Text, MapControls } from "@react-three/drei";
 
-const PRIZES = [
-  { emoji: "🍩", label: "Donitas" },
-  { emoji: "🎉", label: "Confeti" },
-  { emoji: "✨", label: "Estrella brillante" },
-  { emoji: "🧑‍🎤", label: "Giorgi" },
-  { emoji: "🔫", label: "Pistola" },
-  { emoji: "🌌", label: "Galaxia" },
-  { emoji: "🐋", label: "Ballena" },
-  { emoji: "🦁🐱", label: "Gatito león" },
-  { emoji: "⬜", label: "Blanco" },
-  { emoji: "🎧", label: "Audífonos" },
-  { emoji: "💎", label: "Diamante" },
-  { emoji: "🚀", label: "Cohete" },
-  { emoji: "🔥", label: "Fuego" },
-  { emoji: "🍫", label: "Chocolate" },
-  { emoji: "🧸", label: "Oso sorpresa" },
+const PRIZES_CONFIG = [
+  { emoji: "🍩", label: "Donitas", weight: 35, color: "#f59e0b" },
+  { emoji: "🎉", label: "Confeti", weight: 25, color: "#ec4899" },
+  { emoji: "✨", label: "Estrella brillante", weight: 15, color: "#fde047" },
+  { emoji: "🧑‍🎤", label: "Giorgi", weight: 10, color: "#a78bfa" },
+  { emoji: "🔫", label: "Pistola", weight: 7, color: "#f87171" },
+  { emoji: "🌌", label: "Galaxia", weight: 3, color: "#60a5fa" },
+  { emoji: "🐋", label: "Ballena", weight: 2, color: "#38bdf8" },
+  { emoji: "🦁🐱", label: "Gatito león", weight: 1, color: "#fb923c" },
+  { emoji: "⬜", label: "Blanco", weight: 1, color: "#f8fafc" },
+  { emoji: "🟨", label: "Dorado", weight: 1, color: "#facc15" },
+  { emoji: "🟦", label: "Azul", weight: 1, color: "#3b82f6" },
 ];
 
 const BOX_COLORS = [
@@ -48,22 +44,71 @@ const RIBBON_COLORS = ["#ffffff", "#ffe066", "#d9ed92", "#ffd6ff", "#caf0f8"];
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-function pickRandomPrize(excludedPrizeIndex = -1) {
-  if (PRIZES.length === 1) {
-    return { prize: PRIZES[0], prizeIndex: 0 };
+function normalizePrizes(prizes) {
+  const sanitized = prizes
+    .filter((item) => item && Number(item.weight) > 0)
+    .map((item, index) => ({
+      id: item.id ?? `prize-${index}`,
+      emoji: item.emoji ?? "🎁",
+      label: item.label ?? `Premio ${index + 1}`,
+      weight: Number(item.weight) || 0,
+      color: item.color ?? "#facc15",
+    }));
+
+  const totalWeight = sanitized.reduce((acc, item) => acc + item.weight, 0);
+
+  if (!sanitized.length || totalWeight <= 0) {
+    return [
+      {
+        id: "fallback-1",
+        emoji: "🎁",
+        label: "Premio sorpresa",
+        weight: 100,
+        normalizedWeight: 100,
+        probability: 1,
+        probabilityPercent: "100.00",
+        color: "#facc15",
+      },
+    ];
   }
 
-  const availableIndexes = PRIZES.map((_, index) => index).filter(
-    (index) => index !== excludedPrizeIndex
-  );
+  return sanitized.map((item) => {
+    const probability = item.weight / totalWeight;
+    return {
+      ...item,
+      normalizedWeight: item.weight,
+      probability,
+      probabilityPercent: (probability * 100).toFixed(2),
+    };
+  });
+}
 
-  const randomIndex =
-    availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
+function pickWeightedPrize(prizes, excludedPrizeId = null) {
+  let available = prizes;
 
-  return {
-    prize: PRIZES[randomIndex],
-    prizeIndex: randomIndex,
-  };
+  if (excludedPrizeId && prizes.length > 1) {
+    const filtered = prizes.filter((item) => item.id !== excludedPrizeId);
+    if (filtered.length > 0) {
+      available = filtered;
+    }
+  }
+
+  const totalWeight = available.reduce((acc, item) => acc + item.normalizedWeight, 0);
+
+  if (totalWeight <= 0) {
+    return available[0] ?? null;
+  }
+
+  let random = Math.random() * totalWeight;
+
+  for (const item of available) {
+    random -= item.normalizedWeight;
+    if (random <= 0) {
+      return item;
+    }
+  }
+
+  return available[available.length - 1];
 }
 
 function useViewportSize() {
@@ -509,6 +554,12 @@ const PageCube = () => {
 
   const controlsRef = useRef(null);
 
+  const prizes = useMemo(() => normalizePrizes(PRIZES_CONFIG), []);
+  const configuredTotal = useMemo(
+    () => PRIZES_CONFIG.reduce((acc, item) => acc + (Number(item.weight) || 0), 0),
+    []
+  );
+
   const boardConfig = useMemo(() => {
     const rows = 10;
     const cols = 10;
@@ -569,15 +620,17 @@ const PageCube = () => {
   const handleReveal = (gift) => {
     if (selectedId !== gift.id || revealedId) return;
 
-    const previousPrizeIndex = giftPrizeHistory[gift.id] ?? -1;
-    const { prize, prizeIndex } = pickRandomPrize(previousPrizeIndex);
+    const previousPrizeId = giftPrizeHistory[gift.id] ?? null;
+    const prize = pickWeightedPrize(prizes, previousPrizeId);
+
+    if (!prize) return;
 
     setRevealedPrize(prize);
     setRevealedId(gift.id);
 
     setGiftPrizeHistory((prev) => ({
       ...prev,
-      [gift.id]: prizeIndex,
+      [gift.id]: prize.id,
     }));
   };
 
@@ -651,16 +704,28 @@ const PageCube = () => {
         </Suspense>
       </Canvas>
 
-      <div className="pointer-events-none absolute left-1/2 top-3 z-20 w-[calc(100%-20px)] max-w-[680px] -translate-x-1/2 rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-center text-white shadow-2xl backdrop-blur-md md:top-4 md:px-5">
+      <div className="pointer-events-none absolute left-1/2 top-3 z-20 w-[calc(100%-20px)] max-w-[760px] -translate-x-1/2 rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-center text-white shadow-2xl backdrop-blur-md md:top-4 md:px-5">
         <div className="text-[11px] font-extrabold tracking-[0.26em] text-yellow-300 sm:text-xs md:text-sm">
           GIFT GRID
         </div>
+
         <div className="mt-1 text-[11px] leading-relaxed text-white/80 sm:text-xs md:text-sm">
           1 toque: llevar al centro · 2 toques: abrir regalo
           <span className="hidden md:inline"> · arrastra para mover · zoom con rueda o gesto</span>
         </div>
+
         <div className="mt-1 text-[10px] text-white/55 md:hidden">
           Arrastra para mover · pellizca para zoom
+        </div>
+
+        <div className="mt-2 text-[10px] text-white/60 md:text-xs">
+          Probabilidades dinámicas cargadas:{" "}
+          <span className="font-bold text-yellow-200">{configuredTotal}%</span>
+          {configuredTotal !== 100 && (
+            <span className="ml-1 text-orange-300">
+              (normalizado automáticamente a 100%)
+            </span>
+          )}
         </div>
       </div>
 
@@ -678,6 +743,41 @@ const PageCube = () => {
         >
           Reiniciar
         </button>
+      </div>
+
+      <div className="absolute bottom-4 left-3 z-20 hidden max-h-[45vh] w-[280px] overflow-auto rounded-2xl border border-white/10 bg-black/40 p-4 text-white shadow-2xl backdrop-blur-md lg:block">
+        <div className="mb-3 text-xs font-extrabold uppercase tracking-[0.22em] text-yellow-300">
+          Probabilidades
+        </div>
+
+        <div className="space-y-2">
+          {prizes.map((item) => (
+            <div
+              key={item.id}
+              className="rounded-xl border border-white/8 bg-white/5 px-3 py-2"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <span>{item.emoji}</span>
+                  <span>{item.label}</span>
+                </div>
+                <div className="text-xs font-bold text-yellow-200">
+                  {item.probabilityPercent}%
+                </div>
+              </div>
+
+              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{
+                    width: `${item.probabilityPercent}%`,
+                    background: item.color,
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {selectedGift && !revealedId && (
@@ -707,6 +807,13 @@ const PageCube = () => {
 
             <div className="mt-2 text-xl font-extrabold text-yellow-300 md:text-2xl">
               {revealedPrize.label}
+            </div>
+
+            <div className="mt-3 text-sm text-white/70">
+              Probabilidad real:{" "}
+              <span className="font-bold text-white">
+                {revealedPrize.probabilityPercent}%
+              </span>
             </div>
 
             <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
