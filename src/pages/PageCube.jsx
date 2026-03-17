@@ -3,21 +3,17 @@ import { Canvas, useFrame } from "@react-three/fiber";
 import { Text, MapControls } from "@react-three/drei";
 
 const PRIZES = [
-  { emoji: "🍩", label: "Donitas" },
-  { emoji: "🎉", label: "Confeti" },
-  { emoji: "✨", label: "Estrella brillante" },
-  { emoji: "🧑‍🎤", label: "Giorgi" },
-  { emoji: "🔫", label: "Pistola" },
-  { emoji: "🌌", label: "Galaxia" },
-  { emoji: "🐋", label: "Ballena" },
-  { emoji: "🦁🐱", label: "Gatito león" },
-  { emoji: "⬜", label: "Blanco" },
-  { emoji: "🎧", label: "Audífonos" },
-  { emoji: "💎", label: "Diamante" },
-  { emoji: "🚀", label: "Cohete" },
-  { emoji: "🔥", label: "Fuego" },
-  { emoji: "🍫", label: "Chocolate" },
-  { emoji: "🧸", label: "Oso sorpresa" },
+  { id: "donitas", emoji: "🍩", label: "Donitas", weight: 35 },
+  { id: "confeti", emoji: "🎉", label: "Confeti", weight: 25 },
+  { id: "estrella", emoji: "✨", label: "Estrella brillante", weight: 15 },
+  { id: "giorgi", emoji: "🧑‍🎤", label: "Giorgi", weight: 10 },
+  { id: "pistola", emoji: "🔫", label: "Pistola", weight: 7 },
+  { id: "galaxia", emoji: "🌌", label: "Galaxia", weight: 3 },
+  { id: "ballena", emoji: "🐋", label: "Ballena", weight: 2 },
+  { id: "gatito-leon", emoji: "🦁🐱", label: "Gatito león", weight: 1 },
+  { id: "blanco", emoji: "⬜", label: "Blanco", weight: 1 },
+  { id: "dorado", emoji: "🟡", label: "Dorado", weight: 1 },
+  { id: "azul", emoji: "🔵", label: "Azul", weight: 1 },
 ];
 
 const BOX_COLORS = [
@@ -48,22 +44,50 @@ const RIBBON_COLORS = ["#ffffff", "#ffe066", "#d9ed92", "#ffd6ff", "#caf0f8"];
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
-function pickRandomPrize(excludedPrizeIndex = -1) {
-  if (PRIZES.length === 1) {
-    return { prize: PRIZES[0], prizeIndex: 0 };
-  }
+function getTotalWeight(prizes) {
+  return prizes.reduce((acc, prize) => acc + Number(prize.weight || 0), 0);
+}
 
-  const availableIndexes = PRIZES.map((_, index) => index).filter(
-    (index) => index !== excludedPrizeIndex
+function enrichPrizes(prizes) {
+  const totalWeight = getTotalWeight(prizes);
+
+  return prizes.map((prize, index) => ({
+    ...prize,
+    index,
+    probability: totalWeight > 0 ? (Number(prize.weight || 0) / totalWeight) * 100 : 0,
+  }));
+}
+
+function formatPercent(value) {
+  return `${value.toFixed(2)}%`;
+}
+
+function pickWeightedPrize(prizes, excludedPrizeId = null) {
+  const availablePrizes = prizes.filter(
+    (prize) => prize.weight > 0 && prize.id !== excludedPrizeId
   );
 
-  const randomIndex =
-    availableIndexes[Math.floor(Math.random() * availableIndexes.length)];
+  if (availablePrizes.length === 0) {
+    return null;
+  }
 
-  return {
-    prize: PRIZES[randomIndex],
-    prizeIndex: randomIndex,
-  };
+  if (availablePrizes.length === 1) {
+    return availablePrizes[0];
+  }
+
+  const totalWeight = availablePrizes.reduce((acc, prize) => acc + prize.weight, 0);
+  const random = Math.random() * totalWeight;
+
+  let cumulative = 0;
+
+  for (const prize of availablePrizes) {
+    cumulative += prize.weight;
+    if (random <= cumulative) {
+      return prize;
+    }
+  }
+
+  return availablePrizes[availablePrizes.length - 1];
 }
 
 function useViewportSize() {
@@ -501,13 +525,15 @@ const PageCube = () => {
   const isMobile = width < 768;
   const isTablet = width >= 768 && width < 1100;
 
+  const prizePool = useMemo(() => enrichPrizes(PRIZES), []);
+  const totalWeight = useMemo(() => getTotalWeight(PRIZES), []);
+  const controlsRef = useRef(null);
+
   const [selectedId, setSelectedId] = useState(null);
   const [revealedId, setRevealedId] = useState(null);
   const [revealedPrize, setRevealedPrize] = useState(null);
   const [giftPrizeHistory, setGiftPrizeHistory] = useState({});
   const [boardKey, setBoardKey] = useState(0);
-
-  const controlsRef = useRef(null);
 
   const boardConfig = useMemo(() => {
     const rows = 10;
@@ -569,15 +595,17 @@ const PageCube = () => {
   const handleReveal = (gift) => {
     if (selectedId !== gift.id || revealedId) return;
 
-    const previousPrizeIndex = giftPrizeHistory[gift.id] ?? -1;
-    const { prize, prizeIndex } = pickRandomPrize(previousPrizeIndex);
+    const previousPrizeId = giftPrizeHistory[gift.id] ?? null;
+    const pickedPrize = pickWeightedPrize(prizePool, previousPrizeId);
 
-    setRevealedPrize(prize);
+    if (!pickedPrize) return;
+
+    setRevealedPrize(pickedPrize);
     setRevealedId(gift.id);
 
     setGiftPrizeHistory((prev) => ({
       ...prev,
-      [gift.id]: prizeIndex,
+      [gift.id]: pickedPrize.id,
     }));
   };
 
@@ -651,18 +679,39 @@ const PageCube = () => {
         </Suspense>
       </Canvas>
 
-      <div className="pointer-events-none absolute left-1/2 top-3 z-20 w-[calc(100%-20px)] max-w-[680px] -translate-x-1/2 rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-center text-white shadow-2xl backdrop-blur-md md:top-4 md:px-5">
+      {/* <div className="pointer-events-none absolute left-1/2 top-3 z-20 w-[calc(100%-20px)] max-w-[760px] -translate-x-1/2 rounded-2xl border border-white/10 bg-black/35 px-4 py-3 text-center text-white shadow-2xl backdrop-blur-md md:top-4 md:px-5">
         <div className="text-[11px] font-extrabold tracking-[0.26em] text-yellow-300 sm:text-xs md:text-sm">
           GIFT GRID
         </div>
+
         <div className="mt-1 text-[11px] leading-relaxed text-white/80 sm:text-xs md:text-sm">
           1 toque: llevar al centro · 2 toques: abrir regalo
           <span className="hidden md:inline"> · arrastra para mover · zoom con rueda o gesto</span>
         </div>
+
         <div className="mt-1 text-[10px] text-white/55 md:hidden">
           Arrastra para mover · pellizca para zoom
         </div>
-      </div>
+
+        <div className="mt-3 flex flex-wrap items-center justify-center gap-2 text-[10px] text-white/80 md:text-[11px]">
+          {prizePool.map((prize) => (
+            <div
+              key={prize.id}
+              className="rounded-full border border-white/10 bg-white/5 px-2.5 py-1"
+            >
+              <span className="mr-1">{prize.emoji}</span>
+              <span className="font-semibold">{prize.label}</span>
+              <span className="ml-1 text-yellow-300">
+                {formatPercent(prize.probability)}
+              </span>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-2 text-[10px] text-white/50 md:text-[11px]">
+          Sistema dinámico por peso total: <span className="text-yellow-300">{totalWeight}</span>
+        </div>
+      </div> */}
 
       <div className="absolute right-3 top-[90px] z-20 flex flex-col gap-2 md:right-5 md:top-[108px]">
         <button
@@ -689,7 +738,10 @@ const PageCube = () => {
             <div className="mt-2 text-sm font-bold text-yellow-300 md:text-base">
               Dale click otra vez para abrir
             </div>
-            <div className="mt-2 text-xs text-white/65 md:hidden">
+            <div className="mt-2 text-xs text-white/65">
+              El premio sale según probabilidades dinámicas ponderadas
+            </div>
+            <div className="mt-2 text-xs text-white/50 md:hidden">
               También puedes mover y hacer zoom al tablero
             </div>
           </div>
@@ -707,6 +759,18 @@ const PageCube = () => {
 
             <div className="mt-2 text-xl font-extrabold text-yellow-300 md:text-2xl">
               {revealedPrize.label}
+            </div>
+
+            <div className="mt-3 rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-sm text-white/85">
+              <div>
+                Probabilidad actual:{" "}
+                <span className="font-extrabold text-cyan-300">
+                  {formatPercent(revealedPrize.probability)}
+                </span>
+              </div>
+              <div className="mt-1 text-xs text-white/55">
+                Peso: {revealedPrize.weight} de {totalWeight}
+              </div>
             </div>
 
             <div className="mt-5 flex flex-col gap-2 sm:flex-row sm:justify-center">
