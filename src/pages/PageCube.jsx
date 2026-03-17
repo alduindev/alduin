@@ -2,6 +2,7 @@ import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { Text, MapControls } from "@react-three/drei";
 
+<<<<<<< HEAD
 const PRIZES = [
   { id: "donitas", emoji: "🍩", label: "Donitas", weight: 35 },
   { id: "confeti", emoji: "🎉", label: "Confeti", weight: 25 },
@@ -14,6 +15,20 @@ const PRIZES = [
   { id: "blanco", emoji: "⬜", label: "Blanco", weight: 1 },
   { id: "dorado", emoji: "🟡", label: "Dorado", weight: 1 },
   { id: "azul", emoji: "🔵", label: "Azul", weight: 1 },
+=======
+const PRIZES_CONFIG = [
+  { emoji: "🍩", label: "Donitas", weight: 35, color: "#f59e0b" },
+  { emoji: "🎉", label: "Confeti", weight: 25, color: "#ec4899" },
+  { emoji: "✨", label: "Estrella brillante", weight: 15, color: "#fde047" },
+  { emoji: "🧑‍🎤", label: "Giorgi", weight: 10, color: "#a78bfa" },
+  { emoji: "🔫", label: "Pistola", weight: 7, color: "#f87171" },
+  { emoji: "🌌", label: "Galaxia", weight: 3, color: "#60a5fa" },
+  { emoji: "🐋", label: "Ballena", weight: 2, color: "#38bdf8" },
+  { emoji: "🦁🐱", label: "Gatito león", weight: 1, color: "#fb923c" },
+  { emoji: "⬜", label: "Blanco", weight: 1, color: "#f8fafc" },
+  { emoji: "🟨", label: "Dorado", weight: 1, color: "#facc15" },
+  { emoji: "🟦", label: "Azul", weight: 1, color: "#3b82f6" },
+>>>>>>> 28d939a25f943fcb4ebf1c7e341dd2764d0b776e
 ];
 
 const BOX_COLORS = [
@@ -44,6 +59,7 @@ const RIBBON_COLORS = ["#ffffff", "#ffe066", "#d9ed92", "#ffd6ff", "#caf0f8"];
 const lerp = (a, b, t) => a + (b - a) * t;
 const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
 
+<<<<<<< HEAD
 function getTotalWeight(prizes) {
   return prizes.reduce((acc, prize) => acc + Number(prize.weight || 0), 0);
 }
@@ -88,6 +104,73 @@ function pickWeightedPrize(prizes, excludedPrizeId = null) {
   }
 
   return availablePrizes[availablePrizes.length - 1];
+=======
+function normalizePrizes(prizes) {
+  const sanitized = prizes
+    .filter((item) => item && Number(item.weight) > 0)
+    .map((item, index) => ({
+      id: item.id ?? `prize-${index}`,
+      emoji: item.emoji ?? "🎁",
+      label: item.label ?? `Premio ${index + 1}`,
+      weight: Number(item.weight) || 0,
+      color: item.color ?? "#facc15",
+    }));
+
+  const totalWeight = sanitized.reduce((acc, item) => acc + item.weight, 0);
+
+  if (!sanitized.length || totalWeight <= 0) {
+    return [
+      {
+        id: "fallback-1",
+        emoji: "🎁",
+        label: "Premio sorpresa",
+        weight: 100,
+        normalizedWeight: 100,
+        probability: 1,
+        probabilityPercent: "100.00",
+        color: "#facc15",
+      },
+    ];
+  }
+
+  return sanitized.map((item) => {
+    const probability = item.weight / totalWeight;
+    return {
+      ...item,
+      normalizedWeight: item.weight,
+      probability,
+      probabilityPercent: (probability * 100).toFixed(2),
+    };
+  });
+}
+
+function pickWeightedPrize(prizes, excludedPrizeId = null) {
+  let available = prizes;
+
+  if (excludedPrizeId && prizes.length > 1) {
+    const filtered = prizes.filter((item) => item.id !== excludedPrizeId);
+    if (filtered.length > 0) {
+      available = filtered;
+    }
+  }
+
+  const totalWeight = available.reduce((acc, item) => acc + item.normalizedWeight, 0);
+
+  if (totalWeight <= 0) {
+    return available[0] ?? null;
+  }
+
+  let random = Math.random() * totalWeight;
+
+  for (const item of available) {
+    random -= item.normalizedWeight;
+    if (random <= 0) {
+      return item;
+    }
+  }
+
+  return available[available.length - 1];
+>>>>>>> 28d939a25f943fcb4ebf1c7e341dd2764d0b776e
 }
 
 function useViewportSize() {
@@ -727,6 +810,41 @@ const PageCube = () => {
         >
           Reiniciar
         </button>
+      </div>
+
+      <div className="absolute bottom-4 left-3 z-20 hidden max-h-[45vh] w-[280px] overflow-auto rounded-2xl border border-white/10 bg-black/40 p-4 text-white shadow-2xl backdrop-blur-md lg:block">
+        <div className="mb-3 text-xs font-extrabold uppercase tracking-[0.22em] text-yellow-300">
+          Probabilidades
+        </div>
+
+        <div className="space-y-2">
+          {prizes.map((item) => (
+            <div
+              key={item.id}
+              className="rounded-xl border border-white/8 bg-white/5 px-3 py-2"
+            >
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-2 text-sm font-semibold">
+                  <span>{item.emoji}</span>
+                  <span>{item.label}</span>
+                </div>
+                <div className="text-xs font-bold text-yellow-200">
+                  {item.probabilityPercent}%
+                </div>
+              </div>
+
+              <div className="mt-2 h-2 w-full overflow-hidden rounded-full bg-white/10">
+                <div
+                  className="h-full rounded-full transition-all duration-300"
+                  style={{
+                    width: `${item.probabilityPercent}%`,
+                    background: item.color,
+                  }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
 
       {selectedGift && !revealedId && (
